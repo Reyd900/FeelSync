@@ -313,15 +313,6 @@ This project is based on extensive research in:
 3. Zhang et al.: Decision Time and Impulsivity Patterns (2023)
 4. Digital Games as Tools for Behavioral Health - IEEE Transactions (2023)
 
-## 👥 Team
-
-**Group 28 - Capstone Project**
-- **Adithya Kannan** (22BCG10095) - Game Developer & Designer
-- **Dhruv Rai** (22BCG10100) - Machine Learning Engineer  
-- **Shreya Dutta** (22BCG10107) - Research & Evaluation Lead
-- **Shreshtha Gangrade** (22BCG10143) - Documentation & Integration Manager
-
-**Supervisor:** Dr. Sharmila Joseph
 
 ## 📄 License & Disclaimer
 
