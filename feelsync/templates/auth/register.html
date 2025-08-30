@@ -1,0 +1,726 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - FeelSync{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--light-gray) 0%, #e2e8f0 100%);
+        padding: 20px 0;
+    }
+    
+    .auth-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 500px;
+    }
+    
+    .step-indicator {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    
+    .step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .step.active {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .step.completed {
+        background: var(--success-color);
+        color: white;
+    }
+    
+    .step-connector {
+        width: 30px;
+        height: 2px;
+        background: #e2e8f0;
+        margin-top: 19px;
+    }
+    
+    .step-connector.active {
+        background: var(--primary-color);
+    }
+    
+    .form-section {
+        display: none;
+    }
+    
+    .form-section.active {
+        display: block;
+    }
+    
+    .age-warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .consent-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .consent-item {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .consent-item:hover {
+        border-color: var(--primary-color);
+    }
+    
+    .consent-item.required {
+        border-left: 4px solid var(--danger-color);
+    }
+    
+    .consent-item.optional {
+        border-left: 4px solid var(--warning-color);
+    }
+    
+    .form-control {
+        border-radius: 10px;
+        padding: 12px 15px;
+        border: 2px solid #e2e8f0;
+        transition: border-color 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-register {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .password-strength {
+        margin-top: 10px;
+    }
+    
+    .strength-bar {
+        height: 4px;
+        border-radius: 2px;
+        background: #e2e8f0;
+        overflow: hidden;
+    }
+    
+    .strength-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+        width: 0%;
+    }
+    
+    .strength-weak { background: #dc3545; width: 25%; }
+    .strength-fair { background: #ffc107; width: 50%; }
+    .strength-good { background: #28a745; width: 75%; }
+    .strength-strong { background: #20c997; width: 100%; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="auth-card">
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                        <h2>Join FeelSync</h2>
+                        <p class="text-muted">Create your account to start your mental wellness journey</p>
+                    </div>
+
+                    <!-- Step Indicator -->
+                    <div class="step-indicator">
+                        <div class="step active" id="step1">1</div>
+                        <div class="step-connector" id="connector1"></div>
+                        <div class="step" id="step2">2</div>
+                        <div class="step-connector" id="connector2"></div>
+                        <div class="step" id="step3">3</div>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <form method="POST" id="registerForm">
+                        <!-- Step 1: Basic Information -->
+                        <div class="form-section active" id="section1">
+                            <h5 class="mb-3">Basic Information</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="username" class="form-label">
+                                        <i class="fas fa-user me-2"></i>Username *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="username" 
+                                           name="username" 
+                                           placeholder="Choose a username"
+                                           required>
+                                    <div class="form-text">This will be displayed on your profile</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">
+                                        <i class="fas fa-envelope me-2"></i>Email Address *
+                                    </label>
+                                    <input type="email" 
+                                           class="form-control" 
+                                           id="email" 
+                                           name="email" 
+                                           placeholder="Enter your email"
+                                           required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="age" class="form-label">
+                                        <i class="fas fa-birthday-cake me-2"></i>Age *
+                                    </label>
+                                    <select class="form-control" id="age" name="age" required onchange="checkAge()">
+                                        <option value="">Select your age</option>
+                                        {% for age in range(13, 25) %}
+                                        <option value="{{ age }}">{{ age }} years old</option>
+                                        {% endfor %}
+                                        <option value="25+">25+ years old</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="gender" class="form-label">
+                                        <i class="fas fa-user-friends me-2"></i>Gender (Optional)
+                                    </label>
+                                    <select class="form-control" id="gender" name="gender">
+                                        <option value="">Prefer not to say</option>
+                                        <option value="male">Male</option>
+                                        <option value="female">Female</option>
+                                        <option value="non-binary">Non-binary</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Age Warning -->
+                            <div class="age-warning d-none" id="ageWarning">
+                                <div class="d-flex align-items-start">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2 mt-1"></i>
+                                    <div>
+                                        <strong>Parental Consent Required</strong>
+                                        <p class="mb-2">Since you are under 18, you will need parental consent to use FeelSync. 
+                                        A parent or guardian must approve your account.</p>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="parentalConsent" name="parental_consent">
+                                            <label class="form-check-label" for="parentalConsent">
+                                                I have permission from my parent/guardian to create this account
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-primary" onclick="nextStep()">
+                                    <i class="fas fa-arrow-right me-2"></i>Next
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Password Setup -->
+                        <div class="form-section" id="section2">
+                            <h5 class="mb-3">Security Setup</h5>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock me-2"></i>Password *
+                                </label>
+                                <div class="position-relative">
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="password" 
+                                           name="password" 
+                                           placeholder="Create a strong password"
+                                           onkeyup="checkPasswordStrength()"
+                                           required>
+                                    <button type="button" 
+                                            class="btn btn-link position-absolute top-50 end-0 translate-middle-y" 
+                                            onclick="togglePassword('password', 'passwordToggle1')">
+                                        <i class="fas fa-eye" id="passwordToggle1"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="password-strength">
+                                    <div class="strength-bar">
+                                        <div class="strength-fill" id="strengthBar"></div>
+                                    </div>
+                                    <small class="text-muted" id="strengthText">Enter a password</small>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">
+                                    <i class="fas fa-lock me-2"></i>Confirm Password *
+                                </label>
+                                <div class="position-relative">
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="confirmPassword" 
+                                           name="confirm_password" 
+                                           placeholder="Confirm your password"
+                                           onkeyup="checkPasswordMatch()"
+                                           required>
+                                    <button type="button" 
+                                            class="btn btn-link position-absolute top-50 end-0 translate-middle-y" 
+                                            onclick="togglePassword('confirmPassword', 'passwordToggle2')">
+                                        <i class="fas fa-eye" id="passwordToggle2"></i>
+                                    </button>
+                                </div>
+                                <div id="passwordMatch" class="form-text"></div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Password Requirements:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>At least 8 characters long</li>
+                                    <li>Include uppercase and lowercase letters</li>
+                                    <li>Include at least one number</li>
+                                    <li>Include at least one special character</li>
+                                </ul>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary" onclick="previousStep()">
+                                    <i class="fas fa-arrow-left me-2"></i>Back
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="nextStep()" id="step2Next" disabled>
+                                    <i class="fas fa-arrow-right me-2"></i>Next
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Consent and Terms -->
+                        <div class="form-section" id="section3">
+                            <h5 class="mb-3">Privacy & Consent</h5>
+                            
+                            <div class="consent-section">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-shield-alt me-2"></i>Data Collection Consent
+                                </h6>
+                                
+                                <!-- Required Consents -->
+                                <div class="consent-item required">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="dataCollection" name="consent" required>
+                                        <label class="form-check-label" for="dataCollection">
+                                            <strong>Behavioral Data Collection</strong> <span class="badge bg-danger ms-2">Required</span>
+                                            <p class="mb-0 mt-1 text-muted small">
+                                                I consent to FeelSync collecting my gameplay behavioral data for mental health analysis. 
+                                                This data will be anonymized and used to provide personalized insights.
+                                            </p>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="consent-item required">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="termsAgreement" name="terms" required>
+                                        <label class="form-check-label" for="termsAgreement">
+                                            <strong>Terms of Service & Privacy Policy</strong> <span class="badge bg-danger ms-2">Required</span>
+                                            <p class="mb-0 mt-1 text-muted small">
+                                                I have read and agree to the 
+                                                <a href="#" onclick="showTerms()">Terms of Service</a> and 
+                                                <a href="#" onclick="showPrivacyPolicy()">Privacy Policy</a>.
+                                            </p>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Optional Consents -->
+                                <div class="consent-item optional">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="researchParticipation" name="research_consent">
+                                        <label class="form-check-label" for="researchParticipation">
+                                            <strong>Research Participation</strong> <span class="badge bg-warning ms-2">Optional</span>
+                                            <p class="mb-0 mt-1 text-muted small">
+                                                I consent to my anonymized data being used for academic research 
+                                                to improve mental health detection methods.
+                                            </p>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="consent-item optional">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="dataSharing" name="data_sharing_consent">
+                                        <label class="form-check-label" for="dataSharing">
+                                            <strong>Professional Access</strong> <span class="badge bg-warning ms-2">Optional</span>
+                                            <p class="mb-0 mt-1 text-muted small">
+                                                I consent to authorized mental health professionals having access 
+                                                to my data when I explicitly grant permission.
+                                            </p>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Important Disclaimer -->
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Important Disclaimer:</strong>
+                                <p class="mb-0 mt-2">
+                                    FeelSync is <strong>NOT a diagnostic tool</strong> and should not be used to diagnose 
+                                    mental health conditions. It is designed for educational purposes and early awareness only. 
+                                    If you have concerns about your mental health, please consult with a qualified healthcare professional.
+                                </p>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-secondary" onclick="previousStep()">
+                                    <i class="fas fa-arrow-left me-2"></i>Back
+                                </button>
+                                <button type="submit" class="btn btn-register" id="submitBtn">
+                                    <span class="register-text">
+                                        <i class="fas fa-user-plus me-2"></i>Create Account
+                                    </span>
+                                    <span class="loading-text d-none">
+                                        <div class="loading-spinner me-2"></div>Creating Account...
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Footer -->
+                    <div class="text-center mt-4">
+                        <p class="text-muted">
+                            Already have an account? 
+                            <a href="{{ url_for('login') }}" class="text-primary text-decoration-none">
+                                <strong>Sign in here</strong>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentStep = 1;
+    
+    function nextStep() {
+        if (validateCurrentStep()) {
+            currentStep++;
+            showStep(currentStep);
+            updateStepIndicator();
+        }
+    }
+    
+    function previousStep() {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
+            updateStepIndicator();
+        }
+    }
+    
+    function showStep(step) {
+        // Hide all sections
+        document.querySelectorAll('.form-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        // Show current section
+        document.getElementById(`section${step}`).classList.add('active');
+    }
+    
+    function updateStepIndicator() {
+        for (let i = 1; i <= 3; i++) {
+            const stepEl = document.getElementById(`step${i}`);
+            const connectorEl = document.getElementById(`connector${i}`);
+            
+            if (i < currentStep) {
+                stepEl.classList.add('completed');
+                stepEl.classList.remove('active');
+                if (connectorEl) connectorEl.classList.add('active');
+            } else if (i === currentStep) {
+                stepEl.classList.add('active');
+                stepEl.classList.remove('completed');
+            } else {
+                stepEl.classList.remove('active', 'completed');
+                if (connectorEl) connectorEl.classList.remove('active');
+            }
+        }
+    }
+    
+    function validateCurrentStep() {
+        switch (currentStep) {
+            case 1:
+                return validateStep1();
+            case 2:
+                return validateStep2();
+            case 3:
+                return validateStep3();
+            default:
+                return false;
+        }
+    }
+    
+    function validateStep1() {
+        const username = document.getElementById('username').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const age = document.getElementById('age').value;
+        
+        if (!username || !email || !age) {
+            showAlert('Please fill in all required fields', 'warning');
+            return false;
+        }
+        
+        if (parseInt(age) < 18) {
+            const parentalConsent = document.getElementById('parentalConsent').checked;
+            if (!parentalConsent) {
+                showAlert('Parental consent is required for users under 18', 'warning');
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    function validateStep2() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (!password || !confirmPassword) {
+            showAlert('Please fill in both password fields', 'warning');
+            return false;
+        }
+        
+        if (password !== confirmPassword) {
+            showAlert('Passwords do not match', 'warning');
+            return false;
+        }
+        
+        if (!isPasswordStrong(password)) {
+            showAlert('Please create a stronger password', 'warning');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    function validateStep3() {
+        const required = ['dataCollection', 'termsAgreement'];
+        for (let id of required) {
+            if (!document.getElementById(id).checked) {
+                showAlert('Please accept all required terms and consents', 'warning');
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    function checkAge() {
+        const age = parseInt(document.getElementById('age').value);
+        const warning = document.getElementById('ageWarning');
+        
+        if (age && age < 18) {
+            warning.classList.remove('d-none');
+        } else {
+            warning.classList.add('d-none');
+        }
+    }
+    
+    function checkPasswordStrength() {
+        const password = document.getElementById('password').value;
+        const strengthBar = document.getElementById('strengthBar');
+        const strengthText = document.getElementById('strengthText');
+        
+        const strength = calculatePasswordStrength(password);
+        
+        strengthBar.className = 'strength-fill';
+        
+        if (strength.score === 0) {
+            strengthText.textContent = 'Enter a password';
+        } else if (strength.score < 2) {
+            strengthBar.classList.add('strength-weak');
+            strengthText.textContent = 'Weak password';
+            strengthText.className = 'text-danger';
+        } else if (strength.score < 3) {
+            strengthBar.classList.add('strength-fair');
+            strengthText.textContent = 'Fair password';
+            strengthText.className = 'text-warning';
+        } else if (strength.score < 4) {
+            strengthBar.classList.add('strength-good');
+            strengthText.textContent = 'Good password';
+            strengthText.className = 'text-info';
+        } else {
+            strengthBar.classList.add('strength-strong');
+            strengthText.textContent = 'Strong password';
+            strengthText.className = 'text-success';
+        }
+        
+        updateStep2Button();
+    }
+    
+    function calculatePasswordStrength(password) {
+        let score = 0;
+        
+        if (password.length >= 8) score++;
+        if (password.length >= 12) score++;
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+        if (/\d/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        
+        return { score };
+    }
+    
+    function isPasswordStrong(password) {
+        return calculatePasswordStrength(password).score >= 3;
+    }
+    
+    function checkPasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const matchDiv = document.getElementById('passwordMatch');
+        
+        if (confirmPassword) {
+            if (password === confirmPassword) {
+                matchDiv.textContent = '✓ Passwords match';
+                matchDiv.className = 'form-text text-success';
+            } else {
+                matchDiv.textContent = '✗ Passwords do not match';
+                matchDiv.className = 'form-text text-danger';
+            }
+        } else {
+            matchDiv.textContent = '';
+        }
+        
+        updateStep2Button();
+    }
+    
+    function updateStep2Button() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const button = document.getElementById('step2Next');
+        
+        const isValid = password && confirmPassword && 
+                       password === confirmPassword && 
+                       isPasswordStrong(password);
+        
+        button.disabled = !isValid;
+    }
+    
+    function togglePassword(fieldId, iconId) {
+        const field = document.getElementById(fieldId);
+        const icon = document.getElementById(iconId);
+        
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            field.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+    
+    function showTerms() {
+        showAlert('Terms of Service would be displayed here in a full implementation', 'info');
+    }
+    
+    function showPrivacyPolicy() {
+        showAlert('Privacy Policy would be displayed here in a full implementation', 'info');
+    }
+    
+    // Form submission
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!validateStep3()) {
+            return;
+        }
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const registerText = submitBtn.querySelector('.register-text');
+        const loadingText = submitBtn.querySelector('.loading-text');
+        
+        // Show loading state
+        registerText.classList.add('d-none');
+        loadingText.classList.remove('d-none');
+        submitBtn.disabled = true;
+        
+        // Get form data
+        const formData = new FormData(this);
+        
+        // Submit registration
+        fetch('{{ url_for("register") }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showAlert('Registration failed: ' + data.error, 'error');
+            } else {
+                showAlert('Account created successfully! Redirecting to dashboard...', 'success');
+                setTimeout(() => {
+                    window.location.href = '{{ url_for("dashboard") }}';
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            console.error('Registration error:', error);
+            showAlert('Registration failed. Please try again.', 'error');
+        })
+        .finally(() => {
+            registerText.classList.remove('d-none');
+            loadingText.classList.add('d-none');
+            submitBtn.disabled = false;
+        });
+    });
+</script>
+{% endblock %}
