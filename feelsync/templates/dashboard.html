@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - FeelSync{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        height: 100%;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    
+    .game-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        height: 200px;
+    }
+    
+    .game-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .score-badge {
+        font-size: 0.9rem;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 20px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="dashboard-card">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2><i class="fas fa-user-circle me-2"></i>Welcome back, {{ user.username }}!</h2>
+                        <p class="mb-0">Ready to continue your mental wellness journey? Play some games or check your progress below.</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-light btn-lg" onclick="startQuickGame()">
+                            <i class="fas fa-play me-2"></i>Quick Game
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-gamepad fa-2x text-primary mb-3"></i>
+                <div class="stats-number">{{ recent_sessions|length }}</div>
+                <div class="text-muted">Games Played</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-calendar-day fa-2x text-success mb-3"></i>
+                <div class="stats-number">
+                    {% if user.last_login %}
+                        {{ (current_time - user.last_login).days if (current_time - user.last_login).days < 100 else '100+' }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <div class="text-muted">Days Active</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-trophy fa-2x text-warning mb-3"></i>
+                <div class="stats-number">
+                    {% set total_score = recent_sessions|sum(attribute='score') %}
+                    {{ total_score if total_score else 0 }}
+                </div>
+                <div class="text-muted">Total Score</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-chart-line fa-2x text-info mb-3"></i>
+                <div class="stats-number">
+                    {% if latest_analysis %}
+                        {{ latest_analysis.risk_level|title }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </div>
+                <div class="text-muted">Current Status</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Games Section -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-gamepad me-2"></i>Available Games</h5>
+                    <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="game-card bg-gradient-primary text-white" onclick="window.location.href='{{ url_for('catch_thought_game') }}'">
+                                <div class="card-body d-flex flex-column justify-content-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-cloud fa-3x mb-3"></i>
+                                        <h6>Catch the Thought</h6>
+                                        <p class="small">Test your attention and reaction time</p>
+                                        <span class="score-badge bg-white text-primary">60 sec</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="game-card bg-gradient-success text-white" onclick="window.location.href='{{ url_for('stat_balance_game') }}'">
+                                <div class="card-body d-flex flex-column justify-content-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-balance-scale fa-3x mb-3"></i>
+                                        <h6>Stat Balance</h6>
+                                        <p class="small">Decision making under pressure</p>
+                                        <span class="score-badge bg-white text-success">120 sec</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="game-card bg-gradient-warning text-white" onclick="window.location.href='{{ url_for('decision_maker_game') }}'">
+                                <div class="card-body d-flex flex-column justify-content-center">
+                                    <div class="text-center">
+                                        <i class="fas fa-crossroads fa-3x mb-3"></i>
+                                        <h6>Decision Maker</h6>
+                                        <p class="small">Real-world scenario responses</p>
+                                        <span class="score-badge bg-white text-warning">10 scenarios</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history me-2"></i>Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_sessions %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Game</th>
+                                    <th>Date</th>
+                                    <th>Duration</th>
+                                    <th>Score</th>
+                                    <th>Accuracy</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in recent_sessions %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-{{ 'cloud' if session.game_type == 'catch_thought' else 'balance-scale' if session.game_type == 'stat_balance' else 'crossroads' }} me-2"></i>
+                                        {{ session.game_type|replace('_', ' ')|title }}
+                                    </td>
+                                    <td>{{ session.created_at.strftime('%m/%d %H:%M') }}</td>
+                                    <td>{{ session.get_duration_minutes() }}m</td>
+                                    <td>{{ session.score or 0 }}</td>
+                                    <td>{{ '%.1f'|format((session.accuracy or 0) * 100) }}%</td>
+                                    <td>
+                                        {% if session.completed %}
+                                            <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Incomplete</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-gamepad fa-4x text-muted mb-3"></i>
+                        <h6 class="text-muted">No games played yet</h6>
+                        <p class="text-muted">Start playing games to see your activity here!</p>
+                        <button class="btn btn-primary" onclick="startQuickGame()">
+                            <i class="fas fa-play me-2"></i>Play First Game
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Current Status -->
+            {% if latest_analysis %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6><i class="fas fa-brain me-2"></i>Current Insights</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="small text-muted">Anxiety Level</label>
+                        <div class="progress mb-1" style="height: 8px;">
+                            <div class="progress-bar bg-{{ 'success' if latest_analysis.anxiety_score < 40 else 'warning' if latest_analysis.anxiety_score < 70 else 'danger' }}" 
+                                 style="width: {{ latest_analysis.anxiety_score }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ latest_analysis.anxiety_score }}/100</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="small text-muted">Depression Indicators</label>
+                        <div class="progress mb-1" style="height: 8px;">
+                            <div class="progress-bar bg-{{ 'success' if latest_analysis.depression_score < 40 else 'warning' if latest_analysis.depression_score < 70 else 'danger' }}" 
+                                 style="width: {{ latest_analysis.depression_score }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ latest_analysis.depression_score }}/100</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="small text-muted">Attention Score</label>
+                        <div class="progress mb-1" style="height: 8px;">
+                            <div class="progress-bar bg-{{ 'danger' if latest_analysis.attention_score < 40 else 'warning' if latest_analysis.attention_score < 70 else 'success' }}" 
+                                 style="width: {{ latest_analysis.attention_score }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ latest_analysis.attention_score }}/100</small>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('personal_analysis') }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-chart-line me-1"></i>View Full Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-sm" onclick="startQuickGame()">
+                            <i class="fas fa-play me-2"></i>Start Quick Game
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="generateReport()">
+                            <i class="fas fa-file-alt me-2"></i>Generate Report
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="viewProgress()">
+                            <i class="fas fa-chart-line me-2"></i>View Progress
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="exportData()">
+                            <i class="fas fa-download me-2"></i>Export My Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="card">
+                <div class="card-header">
+                    <h6><i class="fas fa-lightbulb me-2"></i>Recommendations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info alert-sm">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Keep it up!</strong> Regular gameplay helps us provide better insights.
+                    </div>
+                    
+                    {% if user.age < 18 %}
+                    <div class="alert alert-warning alert-sm">
+                        <i class="fas fa-users me-2"></i>
+                        <strong>Remember:</strong> Share your results with a trusted adult.
+                    </div>
+                    {% endif %}
+                    
+                    {% if latest_analysis and latest_analysis.requires_attention %}
+                    <div class="alert alert-danger alert-sm">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Consider talking to a counselor</strong> about your recent patterns.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Quick Game Selection Modal -->
+<div class="modal fade" id="quickGameModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-gamepad me-2"></i>Quick Game Selection
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Choose a game to play right now:</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="playGame('catch_thought')">
+                        <i class="fas fa-cloud me-2"></i>Catch the Thought (2 min)
+                    </button>
+                    <button class="btn btn-success" onclick="playGame('stat_balance')">
+                        <i class="fas fa-balance-scale me-2"></i>Stat Balance (3 min)
+                    </button>
+                    <button class="btn btn-warning" onclick="playGame('decision_maker')">
+                        <i class="fas fa-crossroads me-2"></i>Decision Maker (5 min)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Dashboard JavaScript functions
+    
+    function startQuickGame() {
+        new bootstrap.Modal(document.getElementById('quickGameModal')).show();
+    }
+    
+    function playGame(gameType) {
+        const gameUrls = {
+            'catch_thought': '{{ url_for("catch_thought_game") }}',
+            'stat_balance': '{{ url_for("stat_balance_game") }}',
+            'decision_maker': '{{ url_for("decision_maker_game") }}'
+        };
+        
+        bootstrap.Modal.getInstance(document.getElementById('quickGameModal')).hide();
+        window.location.href = gameUrls[gameType];
+    }
+    
+    function generateReport() {
+        showLoading();
+        
+        fetch('/api/report/{{ user.id }}')
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (data.error) {
+                showAlert('Error generating report: ' + data.error, 'error');
+            } else {
+                // Create and download report
+                const reportWindow = window.open('', '_blank');
+                reportWindow.document.write(`
+                    <html>
+                        <head><title>FeelSync Personal Report</title></head>
+                        <body style="font-family: Arial, sans-serif; margin: 40px;">
+                            <h1>Personal Mental Health Report</h1>
+                            <p><strong>Generated:</strong> ${new Date().toLocaleDateString()}</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </body>
+                    </html>
+                `);
+                showAlert('Report generated successfully!', 'success');
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            showAlert('Network error occurred', 'error');
+        });
+    }
+    
+    function viewProgress() {
+        window.location.href = '{{ url_for("personal_analysis") }}';
+    }
+    
+    // Initialize charts if data is available
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if recent_sessions %}
+        initializeDashboardCharts();
+        {% endif %}
+    });
+    
+    function initializeDashboardCharts() {
+        // This would initialize Chart.js charts with user data
+        // Implementation would go here for progress charts
+    }
+    
+    // Update user's last login time
+    fetch('/api/update-last-login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).catch(error => console.log('Could not update last login'));
+</script>
+{% endblock %}
