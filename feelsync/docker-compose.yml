@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  # FeelSync Web Application
+  web:
+    build: .
+    container_name: feelsync_web
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://feelsync:feelsync123@db:5432/feelsync
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=your-production-secret-key-change-this
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+      - ./models/trained:/app/models/trained
+    restart: unless-stopped
+    networks:
+      - feelsync-network
+
+  # PostgreSQL Database
+  db:
+    image: postgres:13
+    container_name: feelsync_db
+    environment:
+      - POSTGRES_DB=feelsync
+      - POSTGRES_USER=feelsync
+      - POSTGRES_PASSWORD=feelsync123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - feelsync-network
+
+  # Redis for Caching and Session Storage
+  redis:
+    image: redis:7-alpine
+    container_name: feelsync_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - feelsync-network
+    command: redis-server --appendonly yes
+
+  # Nginx Reverse Proxy (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: feelsync_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+    networks:
+      - feelsync-network
+
+  # ML Model Training Service (Optional)
+  ml_trainer:
+    build: .
+    container_name: feelsync_ml_trainer
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=postgresql://feelsync:feelsync123@db:5432/feelsync
+    depends_on:
+      - db
+    volumes:
+      - ./models/trained:/app/models/trained
+      - ./data:/app/data
+    command: python scripts/train_models.py
+    restart: "no"  # Run once
+    networks:
+      - feelsync-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  feelsync-network:
+    driver: bridge
+
+---
+# Development docker-compose override
+# Save this as docker-compose.override.yml for development
+version: '3.8'
+
+services:
+  web:
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    volumes:
+      - .:/app  # Mount source code for development
+    ports:
+      - "5000:5000"
+    command: python app.py
+
+  db:
+    ports:
+      - "5432:5432"  # Expose DB port for development tools
+
+  redis:
+    ports:
+      - "6379:6379"  # Expose Redis port for development tools
