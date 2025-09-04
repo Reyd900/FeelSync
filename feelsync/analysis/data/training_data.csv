@@ -1,0 +1,47 @@
+user_id,date,mood_score,sleep_hours,stress_level,social_interaction,exercise_minutes,work_hours,weather_condition,health_status,family_time,creativity_time,financial_stress,mood_factors,notes,intensity,games_played,breathing_minutes,day_of_week,season
+user_001,2024-01-15,4.2,7.5,3,1,30,8,sunny,good,2.0,1.0,2,"Sleep Quality,Exercise",Feeling energetic after morning run,7,1,10,Monday,winter
+user_001,2024-01-16,3.8,6.0,4,2,0,9,cloudy,good,1.5,0.5,2,"Work Stress,Weather","Long day at work, missed workout",6,0,5,Tuesday,winter
+user_001,2024-01-17,4.5,8.0,2,3,45,7,sunny,good,3.0,2.0,1,"Social Interaction,Sleep Quality","Great dinner with friends, slept well",8,2,15,Wednesday,winter
+user_001,2024-01-18,3.2,5.5,5,1,0,10,rainy,fair,1.0,0,3,"Work Stress,Health,Sleep Quality","Feeling under the weather, work deadline",4,0,0,Thursday,winter
+user_001,2024-01-19,4.8,9.0,1,2,60,6,sunny,excellent,2.5,3.0,1,"Exercise,Sleep Quality,Creativity","Amazing sleep and workout, creative project",9,3,20,Friday,winter
+user_002,2024-01-15,2.8,4.0,6,0,0,11,cloudy,poor,0.5,0,4,"Work Stress,Health,Sleep Quality","Couldn't sleep, work pressure mounting",3,0,0,Monday,winter
+user_002,2024-01-16,3.1,5.0,5,1,15,10,rainy,fair,1.0,0.5,4,"Work Stress,Weather","Tried light exercise, still stressed",4,1,5,Tuesday,winter
+user_002,2024-01-17,3.6,6.5,4,2,30,8,partly_cloudy,good,2.0,1.0,3,"Social Interaction,Exercise","Coffee with colleague helped mood",5,1,10,Wednesday,winter
+user_002,2024-01-18,4.2,7.0,3,2,45,7,sunny,good,2.5,1.5,2,"Exercise,Social Interaction","Better sleep, went for walk with friend",6,2,15,Thursday,winter
+user_002,2024-01-19,4.0,7.5,3,3,30,6,sunny,good,3.0,2.0,2,"Family,Social Interaction","Weekend family time, feeling supported",7,1,12,Friday,winter
+user_003,2024-01-15,3.5,6.0,4,1,20,8,sunny,good,1.5,0.5,3,"Work Stress,Exercise","Moderate stress, short workout helped",5,1,8,Monday,winter
+user_003,2024-01-16,4.1,8.0,2,2,40,7,sunny,excellent,2.0,2.5,2,"Sleep Quality,Exercise,Creativity","Great sleep, creative morning session",7,2,18,Tuesday,winter
+user_003,2024-01-17,3.9,7.0,3,3,35,8,partly_cloudy,good,3.5,1.0,2,"Social Interaction,Family","Lunch with family, good conversations",6,1,12,Wednesday,winter
+user_003,2024-01-18,2.9,5.5,5,1,0,9,rainy,fair,1.0,0,4,"Weather,Work Stress,Sleep Quality","Rainy day blues, work challenges",4,0,5,Thursday,winter
+user_003,2024-01-19,4.4,8.5,2,2,50,6,sunny,excellent,2.5,3.0,1,"Exercise,Sleep Quality,Creativity","Perfect Friday, all activities aligned",8,3,25,Friday,winter
+user_004,2024-01-15,4.7,8.0,1,3,60,5,sunny,excellent,4.0,2.0,1,"Family,Exercise,Social Interaction","Family hike, felt connected and energized",9,2,20,Monday,winter
+user_004,2024-01-16,4.3,7.5,2,2,45,7,partly_cloudy,good,2.5,1.5,2,"Exercise,Family","Morning yoga with partner, productive day",7,2,15,Tuesday,winter
+user_004,2024-01-17,3.7,6.5,4,1,25,8,rainy,good,2.0,1.0,3,"Weather,Work Stress","Rainy day affected energy, work stress",5,1,10,Wednesday,winter
+user_004,2024-01-18,4.6,8.5,1,3,55,6,sunny,excellent,3.0,2.5,1,"Sleep Quality,Exercise,Social Interaction","Perfect sleep, group fitness class",8,3,22,Thursday,winter
+user_004,2024-01-19,4.9,9.0,1,4,70,4,sunny,excellent,4.5,3.0,1,"Family,Exercise,Social Interaction,Sleep Quality","Weekend family adventure, amazing day",10,2,30,Friday,winter
+user_005,2024-01-15,3.3,6.0,4,1,15,9,cloudy,fair,1.5,0.5,3,"Work Stress,Weather","Cloudy Monday blues, work challenges",4,1,8,Monday,winter
+user_005,2024-01-16,3.8,7.0,3,2,30,8,partly_cloudy,good,2.0,1.0,3,"Exercise,Social Interaction","Better mood after gym session",6,1,12,Tuesday,winter
+user_005,2024-01-17,4.1,7.5,2,3,40,7,sunny,good,2.5,1.5,2,"Sleep Quality,Social Interaction,Exercise","Good sleep, lunch with friends",7,2,15,Wednesday,winter
+user_005,2024-01-18,3.4,5.0,5,1,0,10,rainy,fair,1.0,0,4,"Sleep Quality,Work Stress,Weather","Poor sleep, heavy workload, rain",4,0,5,Thursday,winter
+user_005,2024-01-19,4.2,8.0,2,3,45,6,sunny,good,3.0,2.0,2,"Sleep Quality,Social Interaction,Exercise","Recovery day, social evening",7,2,18,Friday,winter
+user_006,2024-01-20,2.5,3.5,7,0,0,12,cloudy,poor,0.5,0,5,"Work Stress,Health,Sleep Quality","Insomnia, overwhelming work pressure",2,0,0,Saturday,winter
+user_006,2024-01-21,2.8,4.5,6,1,10,10,rainy,fair,1.0,0,4,"Sleep Quality,Work Stress,Weather","Slight improvement but still struggling",3,1,5,Sunday,winter
+user_006,2024-01-22,3.2,6.0,5,1,20,9,partly_cloudy,fair,1.5,0.5,4,"Exercise,Work Stress","Small workout helped a bit",4,1,10,Monday,winter
+user_006,2024-01-23,3.6,6.5,4,2,30,8,sunny,good,2.0,1.0,3,"Exercise,Social Interaction","Gradual improvement, friend support",5,2,12,Tuesday,winter
+user_006,2024-01-24,4.0,7.0,3,2,40,7,sunny,good,2.5,1.5,2,"Sleep Quality,Exercise,Social Interaction","First good sleep in days, feeling hopeful",6,2,15,Wednesday,winter
+user_007,2024-01-15,4.6,8.5,1,4,65,5,sunny,excellent,3.5,3.0,1,"Exercise,Social Interaction,Creativity,Family","Perfect balance day, creative energy high",9,3,25,Monday,winter
+user_007,2024-01-16,4.4,8.0,2,3,50,6,sunny,excellent,3.0,2.5,1,"Sleep Quality,Exercise,Social Interaction","Maintained good energy, social lunch",8,2,20,Tuesday,winter
+user_007,2024-01-17,4.2,7.5,2,3,45,7,partly_cloudy,good,2.5,2.0,2,"Exercise,Social Interaction","Consistent routine, feeling stable",7,2,18,Wednesday,winter
+user_007,2024-01-18,4.8,9.0,1,2,60,5,sunny,excellent,3.0,3.5,1,"Sleep Quality,Exercise,Creativity","Breakthrough creative session, amazing sleep",9,3,28,Thursday,winter
+user_007,2024-01-19,4.9,8.5,1,4,70,4,sunny,excellent,4.0,3.0,1,"Family,Exercise,Social Interaction,Sleep Quality","Weekend perfection, all areas balanced",10,2,30,Friday,winter
+user_008,2024-01-20,3.1,5.5,5,1,0,9,rainy,fair,1.0,0.5,4,"Weather,Work Stress,Sleep Quality","Rainy weekend, work thoughts intruding",4,0,5,Saturday,winter
+user_008,2024-01-21,3.4,6.0,4,2,20,8,cloudy,fair,1.5,1.0,3,"Exercise,Work Stress","Light activity helped mood slightly",4,1,8,Sunday,winter
+user_008,2024-01-22,3.8,7.0,3,2,35,7,partly_cloudy,good,2.0,1.0,3,"Sleep Quality,Exercise","Better sleep pattern emerging",6,1,12,Monday,winter
+user_008,2024-01-23,4.1,7.5,2,3,45,7,sunny,good,2.5,1.5,2,"Sleep Quality,Exercise,Social Interaction","Good momentum building",7,2,15,Tuesday,winter
+user_008,2024-01-24,4.3,8.0,2,3,50,6,sunny,good,3.0,2.0,2,"Sleep Quality,Exercise,Social Interaction","Feeling more like myself again",7,2,18,Wednesday,winter
+user_009,2024-01-25,2.2,4.0,7,0,0,11,stormy,poor,0,0,5,"Weather,Work Stress,Health,Sleep Quality","Storm kept me awake, feeling overwhelmed",2,0,0,Thursday,winter
+user_009,2024-01-26,2.6,5.0,6,1,15,10,cloudy,fair,1.0,0,4,"Sleep Quality,Work Stress,Weather","Trying to recover from yesterday",3,1,5,Friday,winter
+user_009,2024-01-27,3.0,6.0,5,1,25,8,partly_cloudy,fair,1.5,0.5,4,"Exercise,Work Stress","Small improvements with movement",4,1,10,Saturday,winter
+user_009,2024-01-28,3.5,6.5,4,2,30,7,sunny,good,2.0,1.0,3,"Exercise,Social Interaction","Friend reached out, felt supported",5,2,12,Sunday,winter
+user_009,2024-01-29,3.8,7.0,3,2,40,7,sunny,good,2.5,1.5,3,"Sleep Quality,Exercise,Social Interaction","Steady progress, hope returning",6,2,15,Monday,winter
+user_010,2024-01-30,4.5,8.0,2,3,55,6,sunny,excellent,3.0,2.5,2,"Sleep Quality,Exercise,Social Interaction","Great start to the week",8,2,20,Tuesday,winter
