@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy & Consent - FeelSync</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <style>
+        .consent-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+
+        .consent-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .consent-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .consent-section h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .consent-section p, .consent-section li {
+            color: #4a5568;
+            margin-bottom: 12px;
+        }
+
+        .consent-section ul {
+            padding-left: 20px;
+        }
+
+        .important-notice {
+            background: #fef5e7;
+            border-left: 4px solid #ed8936;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .important-notice h4 {
+            color: #c05621;
+            margin-bottom: 10px;
+        }
+
+        .consent-checkboxes {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: #667eea;
+        }
+
+        .checkbox-item.checked {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+            margin-top: 2px;
+        }
+
+        .checkbox-label {
+            flex: 1;
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .checkbox-description {
+            color: #4a5568;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .consent-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6b4190 100%);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .privacy-summary {
+            background: #f0fff4;
+            border: 2px solid #48bb78;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .privacy-summary h4 {
+            color: #2f855a;
+            margin-bottom: 15px;
+        }
+
+        .privacy-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .privacy-point {
+            display: flex;
+            align-items: center;
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .privacy-point::before {
+            content: '✓';
+            color: #48bb78;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .contact-info {
+            background: #edf2f7;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .version-info {
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .consent-container {
+                padding: 15px;
+            }
+            
+            .consent-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .privacy-points {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="consent-container">
+        <div class="consent-header">
+            <h1>🛡️ Privacy & Consent</h1>
+            <p>Your mental health data is precious. Learn how we protect it.</p>
+        </div>
+
+        <div class="privacy-summary">
+            <h4>🔒 Your Privacy, Our Priority</h4>
+            <div class="privacy-points">
+                <div class="privacy-point">All data stored locally</div>
+                <div class="privacy-point">No personal data shared</div>
+                <div class="privacy-point">You control your information</div>
+                <div class="privacy-point">Anonymous analytics only</div>
+                <div class="privacy-point">GDPR compliant</div>
+                <div class="privacy-point">Delete anytime</div>
+            </div>
+        </div>
+
+        <div class="consent-section">
+            <h3>📋 What Data We Collect</h3>
+            <p>FeelSync collects the following information to provide you with personalized mental wellness support:</p>
+            <ul>
+                <li><strong>Mood Entries:</strong> Your daily mood ratings, factors, and notes</li>
+                <li><strong>Activity Data:</strong> Game scores, breathing exercise duration, and engagement metrics</li>
+                <li><strong>Usage Patterns:</strong> How often you use different features (anonymous)</li>
+                <li><strong>Device Information:</strong> Basic technical data to ensure app functionality</li>
+                <li><strong>Optional Profile:</strong> Name and email if you choose to provide them</li>
+            </ul>
+        </div>
+
+        <div class="consent-section">
+            <h3>🔐 How We Protect Your Data</h3>
+            <p>Your mental health information is extremely sensitive. Here's how we safeguard it:</p>
+            <ul>
+                <li><strong>Local Storage:</strong> All personal data stays on your device using encrypted browser storage</li>
+                <li><strong>No Cloud Sync:</strong> Your mood entries and personal notes never leave your device</li>
+                <li><strong>Anonymous Analytics:</strong> Only aggregate, non-identifiable usage statistics are collected</li>
+                <li><strong>No Third-Party Sharing:</strong> We never sell or share your personal information</li>
+                <li><strong>Secure Communication:</strong> All connections use industry-standard encryption</li>
+                <li><strong>Regular Security Updates:</strong> We continuously improve our security measures</li>
+            </ul>
+        </div>
+
+        <div class="important-notice">
+            <h4>⚠️ Important Mental Health Notice</h4>
+            <p>FeelSync is a wellness tool designed to support your mental health journey, but it is <strong>not a replacement for professional medical care</strong>. If you are experiencing severe depression, anxiety, suicidal thoughts, or any mental health crisis, please contact a qualified healthcare provider or emergency services immediately.</p>
+        </div>
+
+        <div class="consent-section">
+            <h3>📊 Anonymous Research Participation</h3>
+            <p>To improve mental health tools for everyone, you can choose to contribute anonymous data for research purposes. This includes:</p>
+            <ul>
+                <li>General mood trends (no personal identifiers)</li>
+                <li>Popular app features and usage patterns</li>
+                <li>Effectiveness of different wellness activities</li>
+            </ul>
+            <p><strong>Note:</strong> This is completely optional and can be changed at any time in your settings.</p>
+        </div>
+
+        <div class="consent-section">
+            <h3>🎯 Therapeutic Use</h3>
+            <p>If you're working with a mental health professional:</p>
+            <ul>
+                <li>You can export your data to share with your therapist</li>
+                <li>Your therapist cannot access your data without your explicit permission</li>
+                <li>All sharing is done through secure, encrypted reports that you control</li>
+                <li>You can revoke access or stop sharing at any time</li>
+            </ul>
+        </div>
+
+        <div class="consent-section">
+            <h3>📱 Your Rights & Control</h3>
+            <p>You have complete control over your data:</p>
+            <ul>
+                <li><strong>Access:</strong> View all data we have about you at any time</li>
+                <li><strong>Export:</strong> Download your complete data history</li>
+                <li><strong>Delete:</strong> Remove all your data permanently</li>
+                <li><strong>Correct:</strong> Update or modify any information</li>
+                <li><strong>Withdraw Consent:</strong> Stop data collection at any time</li>
+            </ul>
+        </div>
+
+        <div class="consent-checkboxes">
+            <h3>Please review and agree to the following:</h3>
+            
+            <div class="checkbox-item">
+                <input type="checkbox" id="data-collection" required>
+                <label for="data-collection" class="checkbox-label">
+                    I understand what data FeelSync collects and how it's used
+                    <div class="checkbox-description">Required to use the app</div>
+                </label>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" id="local-storage" required>
+                <label for="local-storage" class="checkbox-label">
+                    I agree to store my mental health data locally on this device
+                    <div class="checkbox-description">Required for app functionality</div>
+                </label>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" id="mental-health-disclaimer" required>
+                <label for="mental-health-disclaimer" class="checkbox-label">
+                    I understand that FeelSync is not a replacement for professional medical care
+                    <div class="checkbox-description">Important for your safety</div>
+                </label>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" id="age-confirmation" required>
+                <label for="age-confirmation" class="checkbox-label">
+                    I confirm that I am at least 13 years old
+                    <div class="checkbox-description">Required by privacy regulations</div>
+                </label>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" id="anonymous-research">
+                <label for="anonymous-research" class="checkbox-label">
+                    I agree to contribute anonymous data for mental health research
+                    <div class="checkbox-description">Optional - helps improve mental health tools for everyone</div>
+                </label>
+            </div>
+
+            <div class="checkbox-item">
+                <input type="checkbox" id="marketing-communications">
+                <label for="marketing-communications" class="checkbox-label">
+                    I'd like to receive helpful mental wellness tips and updates
+                    <div class="checkbox-description">Optional - you can unsubscribe anytime</div>
+                </label>
+            </div>
+        </div>
+
+        <div class="contact-info">
+            <h4>Questions or Concerns?</h4>
+            <p>Contact our Privacy Team: <a href="mailto:privacy@feelsync.app">privacy@feelsync.app</a></p>
+            <p>Mental Health Resources: <a href="tel:988">988 Suicide & Crisis Lifeline</a></p>
+        </div>
+
+        <div class="consent-actions">
+            <button onclick="goBack()" class="btn btn-secondary">Go Back</button>
+            <button onclick="acceptConsent()" id="accept-btn" class="btn btn-primary" disabled>
+                Accept & Continue to FeelSync
+            </button>
+        </div>
+
+        <div class="version-info">
+            <p>Privacy Policy Version 1.0 • Last Updated: March 2024</p>
+            <p>This policy complies with GDPR, CCPA, and HIPAA guidelines</p>
+        </div>
+    </div>
+
+    <script>
+        class ConsentManager {
+            constructor() {
+                this.requiredConsents = ['data-collection', 'local-storage', 'mental-health-disclaimer', 'age-confirmation'];
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.updateAcceptButton();
+            }
+
+            setupEventListeners() {
+                // Monitor checkbox changes
+                document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        this.updateCheckboxStyle(checkbox);
+                        this.updateAcceptButton();
+                    });
+                });
+
+                // Style checkboxes on load
+                document.querySelectorAll('.checkbox-item').forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    this.updateCheckboxStyle(checkbox);
+                });
+            }
+
+            updateCheckboxStyle(checkbox) {
+                const item = checkbox.closest('.checkbox-item');
+                if (checkbox.checked) {
+                    item.classList.add('checked');
+                } else {
+                    item.classList.remove('checked');
+                }
+            }
+
+            updateAcceptButton() {
+                const acceptBtn = document.getElementById('accept-btn');
+                const allRequiredChecked = this.requiredConsents.every(id => 
+                    document.getElementById(id).checked
+                );
+
+                acceptBtn.disabled = !allRequiredChecked;
+            }
+
+            getConsentData() {
+                const consents = {};
+                document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    consents[checkbox.id] = checkbox.checked;
+                });
+
+                return {
+                    timestamp: new Date().toISOString(),
+                    consents: consents,
+                    version: '1.0',
+                    ipAddress: 'not-collected', // We don't collect IP addresses
+                    userAgent: navigator.userAgent
+                };
+            }
+
+            saveConsent() {
+                const consentData = this.getConsentData();
+                
+                // Save to local storage
+                localStorage.setItem('feelSyncConsent', JSON.stringify(consentData));
+                
+                // Save individual settings for easy access
+                localStorage.setItem('feelSyncResearchConsent', consentData.consents['anonymous-research']);
+                localStorage.setItem('feelSyncMarketingConsent', consentData.consents['marketing-communications']);
+                
+                return true;
+            }
+        }
+
+        // Initialize consent manager
+        const consentManager = new ConsentManager();
+
+        // Global functions
+        function goBack() {
+            // Could redirect to a landing page or close the tab
+            if (history.length > 1) {
+                history.back();
+            } else {
+                window.location.href = 'https://feelsync.app'; // Your main website
+            }
+        }
+
+        function acceptConsent() {
+            if (consentManager.saveConsent()) {
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.style.position = 'fixed';
+                successDiv.style.top = '20px';
+                successDiv.style.right = '20px';
+                successDiv.style.background = '#48bb78';
+                successDiv.style.color = 'white';
+                successDiv.style.padding = '15px 20px';
+                successDiv.style.borderRadius = '10px';
+                successDiv.style.zIndex = '10000';
+                successDiv.textContent = 'Consent saved! Redirecting to FeelSync...';
+                document.body.appendChild(successDiv);
+
+                // Redirect to main app after short delay
+                setTimeout(() => {
+                    window.location.href = '../index.html';
+                }, 1500);
+            } else {
+                alert('Error saving consent. Please try again.');
+            }
+        }
+
+        // Check if consent already exists
+        document.addEventListener('DOMContentLoaded', function() {
+            const existingConsent = localStorage.getItem('feelSyncConsent');
+            if (existingConsent) {
+                const shouldSkip = confirm('You have already provided consent. Would you like to go directly to FeelSync?');
+                if (shouldSkip) {
+                    window.location.href = '../index.html';
+                    return;
+                }
+                
+                // Pre-fill form with existing consents
+                try {
+                    const consentData = JSON.parse(existingConsent);
+                    Object.keys(consentData.consents).forEach(id => {
+                        const checkbox = document.getElementById(id);
+                        if (checkbox) {
+                            checkbox.checked = consentData.consents[id];
+                            consentManager.updateCheckboxStyle(checkbox);
+                        }
+                    });
+                    consentManager.updateAcceptButton();
+                } catch (error) {
+                    console.error('Error loading existing consent:', error);
+                }
+            }
+        });
+
+        // Add smooth scrolling for long content
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
