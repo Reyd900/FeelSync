@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catch the Thought - FeelSync</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/games.css">
+    <style>
+        .catch-thought-game {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .game-area {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .thought-bubble {
+            position: absolute;
+            width: 120px;
+            height: 80px;
+            background: white;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2d3748;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 10px;
+            text-align: center;
+            line-height: 1.2;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .thought-bubble:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .thought-bubble.positive {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .thought-bubble.negative {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+        }
+
+        .thought-bubble.neutral {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .thought-bubble.caught {
+            animation: pop 0.5s ease;
+            pointer-events: none;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-text {
+            color: #4a5568;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        .difficulty-selector {
+            margin: 20px 0;
+        }
+
+        .difficulty-selector select {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .instructions {
+            background: #f7fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .instructions h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .instructions ul {
+            text-align: left;
+            max-width: 500px;
+            margin: 0 auto;
+            color: #4a5568;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .progress-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievement {
+            display: inline-block;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #2d3748;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            display: none;
+        }
+
+        .game-over.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">🌙</span>
+                <span class="brand-text">FeelSync</span>
+            </div>
+            <button onclick="window.location.href='../index.html'" class="btn btn-secondary">← Back to Dashboard</button>
+        </div>
+    </nav>
+
+    <div class="catch-thought-game">
+        <div class="instructions">
+            <h3>🎯 Catch the Thought</h3>
+            <p>Help manage anxious thoughts by catching and transforming them!</p>
+            <ul>
+                <li><strong>Catch negative thoughts</strong> (red bubbles) to transform them</li>
+                <li><strong>Collect positive thoughts</strong> (green bubbles) to boost your mood</li>
+                <li><strong>Neutral thoughts</strong> (blue bubbles) provide balance</li>
+                <li>The faster you catch negative thoughts, the higher your score!</li>
+            </ul>
+        </div>
+
+        <div class="difficulty-selector">
+            <label for="difficulty">Difficulty: </label>
+            <select id="difficulty">
+                <option value="easy">Easy - Slow thoughts</option>
+                <option value="medium" selected>Medium - Normal speed</option>
+                <option value="hard">Hard - Fast thoughts</option>
+            </select>
+        </div>
+
+        <div class="game-stats">
+            <div class="stat-box">
+                <span class="stat-number" id="score">0</span>
+                <div class="stat-text">Score</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number" id="positive-caught">0</span>
+                <div class="stat-text">Positive Thoughts</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number" id="negative-caught">0</span>
+                <div class="stat-text">Negative Transformed</div>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number" id="time-left">60</span>
+                <div class="stat-text">Time Left</div>
+            </div>
+        </div>
+
+        <div class="game-area" id="game-area">
+            <div class="game-over" id="game-over">
+                <h3>Game Complete! 🎉</h3>
+                <p id="final-message">Well done!</p>
+                <div id="final-stats"></div>
+                <button onclick="startGame()" class="btn btn-primary">Play Again</button>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button onclick="startGame()" id="start-btn" class="btn btn-primary">Start Game</button>
+            <button onclick="pauseGame()" id="pause-btn" class="btn btn-secondary" disabled>Pause</button>
+            <button onclick="resetGame()" id="reset-btn" class="btn btn-secondary">Reset</button>
+        </div>
+
+        <div class="progress-section">
+            <h4>Your Progress</h4>
+            <p>Games Played: <span id="games-played">0</span></p>
+            <p>Best Score: <span id="best-score">0</span></p>
+            <div id="achievements"></div>
+        </div>
+    </div>
+
+    <script>
+        class CatchThoughtGame {
+            constructor() {
+                this.gameArea = document.getElementById('game-area');
+                this.isPlaying = false;
+                this.isPaused = false;
+                this.gameTimer = null;
+                this.spawnTimer = null;
+                this.timeLeft = 60;
+                this.score = 0;
+                this.positiveCaught = 0;
+                this.negativeCaught = 0;
+                this.thoughts = [];
+                
+                this.thoughtTypes = {
+                    positive: {
+                        texts: [
+                            "I can do this", "I am strong", "Tomorrow is better", 
+                            "I am loved", "This too shall pass", "I'm growing",
+                            "I'm enough", "Good things come", "I believe in me",
+                            "Progress not perfection"
+                        ],
+                        color: 'positive',
+                        points: 10
+                    },
+                    negative: {
+                        texts: [
+                            "I'm not good enough", "Everyone judges me", "I always fail",
+                            "Nothing goes right", "I'm so anxious", "What if I mess up?",
+                            "I can't handle this", "I'm alone", "It's hopeless",
+                            "I'm not smart enough"
+                        ],
+                        color: 'negative',
+                        points: 15
+                    },
+                    neutral: {
+                        texts: [
+                            "What should I eat?", "It's a nice day", "Time to rest",
+                            "Let me think", "One step at a time", "Breathe deeply",
+                            "Stay focused", "Be present", "Just observe",
+                            "Notice and accept"
+                        ],
+                        color: 'neutral',
+                        points: 5
+                    }
+                };
+
+                this.loadProgress();
+            }
+
+            startGame() {
+                if (this.isPlaying && !this.isPaused) return;
+
+                if (!this.isPlaying) {
+                    this.resetStats();
+                }
+
+                this.isPlaying = true;
+                this.isPaused = false;
+                
+                document.getElementById('start-btn').disabled = true;
+                document.getElementById('pause-btn').disabled = false;
+                
+                if (!this.gameTimer) {
+                    this.gameTimer = setInterval(() => this.updateTimer(), 1000);
+                }
+                
+                if (!this.spawnTimer) {
+                    this.startSpawning();
+                }
+
+                document.getElementById('game-over').classList.remove('show');
+            }
+
+            pauseGame() {
+                if (!this.isPlaying) return;
+
+                this.isPaused = !this.isPaused;
+                
+                if (this.isPaused) {
+                    clearInterval(this.gameTimer);
+                    clearInterval(this.spawnTimer);
+                    this.gameTimer = null;
+                    this.spawnTimer = null;
+                    document.getElementById('pause-btn').textContent = 'Resume';
+                } else {
+                    this.gameTimer = setInterval(() => this.updateTimer(), 1000);
+                    this.startSpawning();
+                    document.getElementById('pause-btn').textContent = 'Pause';
+                }
+            }
+
+            resetGame() {
+                this.endGame();
+                this.resetStats();
+                this.clearThoughts();
+            }
+
+            resetStats() {
+                this.timeLeft = 60;
+                this.score = 0;
+                this.positiveCaught = 0;
+                this.negativeCaught = 0;
+                this.updateDisplay();
+            }
+
+            startSpawning() {
+                const difficulty = document.getElementById('difficulty').value;
+                let spawnRate;
+                
+                switch(difficulty) {
+                    case 'easy': spawnRate = 2000; break;
+                    case 'medium': spawnRate = 1500; break;
+                    case 'hard': spawnRate = 1000; break;
+                    default: spawnRate = 1500;
+                }
+
+                this.spawnTimer = setInterval(() => {
+                    if (!this.isPaused) {
+                        this.spawnThought();
+                    }
+                }, spawnRate);
+            }
+
+            spawnThought() {
+                const types = Object.keys(this.thoughtTypes);
+                const randomType = types[Math.floor(Math.random() * types.length)];
+                const thoughtData = this.thoughtTypes[randomType];
+                const thoughtText = thoughtData.texts[Math.floor(Math.random() * thoughtData.texts.length)];
+
+                const thought = document.createElement('div');
+                thought.className = `thought-bubble ${thoughtData.color}`;
+                thought.textContent = thoughtText;
+                
+                // Random position
+                const maxX = this.gameArea.clientWidth - 120;
+                const maxY = this.gameArea.clientHeight - 80;
+                thought.style.left = Math.random() * maxX + 'px';
+                thought.style.top = Math.random() * maxY + 'px';
+                
+                // Add click handler
+                thought.addEventListener('click', () => this.catchThought(thought, randomType, thoughtData.points));
+                
+                this.gameArea.appendChild(thought);
+                this.thoughts.push(thought);
+
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (thought.parentNode) {
+                        this.removeThought(thought);
+                    }
+                }, 5000);
+            }
+
+            catchThought(thoughtElement, type, points) {
+                if (!this.isPlaying || this.isPaused) return;
+
+                thoughtElement.classList.add('caught');
+                
+                this.score += points;
+                
+                if (type === 'positive') {
+                    this.positiveCaught++;
+                } else if (type === 'negative') {
+                    this.negativeCaught++;
+                }
+
+                this.updateDisplay();
+                
+                setTimeout(() => {
+                    this.removeThought(thoughtElement);
+                }, 500);
+
+                // Show positive feedback
+                this.showFeedback(type, points, thoughtElement);
+            }
+
+            showFeedback(type, points, element) {
+                const feedback = document.createElement('div');
+                feedback.style.position = 'absolute';
+                feedback.style.left = element.style.left;
+                feedback.style.top = element.style.top;
+                feedback.style.color = type === 'positive' ? '#48bb78' : type === 'negative' ? '#f56565' : '#4299e1';
+                feedback.style.fontSize = '1.2rem';
+                feedback.style.fontWeight = 'bold';
+                feedback.style.pointerEvents = 'none';
+                feedback.style.zIndex = '1000';
+                feedback.textContent = `+${points}`;
+                
+                this.gameArea.appendChild(feedback);
+                
+                setTimeout(() => {
+                    if (feedback.parentNode) {
+                        feedback.remove();
+                    }
+                }, 1000);
+            }
+
+            removeThought(thought) {
+                const index = this.thoughts.indexOf(thought);
+                if (index > -1) {
+                    this.thoughts.splice(index, 1);
+                }
+                if (thought.parentNode) {
+                    thought.remove();
+                }
+            }
+
+            clearThoughts() {
+                this.thoughts.forEach(thought => {
+                    if (thought.parentNode) {
+                        thought.remove();
+                    }
+                });
+                this.thoughts = [];
+            }
+
+            updateTimer() {
+                this.timeLeft--;
+                this.updateDisplay();
+                
+                if (this.timeLeft <= 0) {
+                    this.endGame();
+                }
+            }
+
+            updateDisplay() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('positive-caught').textContent = this.positiveCaught;
+                document.getElementById('negative-caught').textContent = this.negativeCaught;
+                document.getElementById('time-left').textContent = this.timeLeft;
+            }
+
+            endGame() {
+                this.isPlaying = false;
+                this.isPaused = false;
+                
+                if (this.gameTimer) {
+                    clearInterval(this.gameTimer);
+                    this.gameTimer = null;
+                }
+                
+                if (this.spawnTimer) {
+                    clearInterval(this.spawnTimer);
+                    this.spawnTimer = null;
+                }
+                
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('pause-btn').disabled = true;
+                document.getElementById('pause-btn').textContent = 'Pause';
+                
+                this.clearThoughts();
+                this.showGameOver();
+                this.saveProgress();
+            }
+
+            showGameOver() {
+                const gameOverDiv = document.getElementById('game-over');
+                const finalMessage = document.getElementById('final-message');
+                const finalStats = document.getElementById('final-stats');
+                
+                let message = "Great job!";
+                if (this.score >= 200) {
+                    message = "Outstanding! You're a thought-catching master! 🌟";
+                } else if (this.score >= 150) {
+                    message = "Excellent work! You handled those thoughts well! 👏";
+                } else if (this.score >= 100) {
+                    message = "Good job! You're getting better at managing thoughts! 💪";
+                } else {
+                    message = "Nice try! Keep practicing to improve! 🌱";
+                }
+                
+                finalMessage.textContent = message;
+                
+                finalStats.innerHTML = `
+                    <p>Final Score: <strong>${this.score}</strong></p>
+                    <p>Positive Thoughts: <strong>${this.positiveCaught}</strong></p>
+                    <p>Negative Thoughts Transformed: <strong>${this.negativeCaught}</strong></p>
+                    <p>Total Thoughts Caught: <strong>${this.positiveCaught + this.negativeCaught}</strong></p>
+                `;
+                
+                gameOverDiv.classList.add('show');
+            }
+
+            loadProgress() {
+                const saved = localStorage.getItem('catchThoughtProgress');
+                if (saved) {
+                    const progress = JSON.parse(saved);
+                    document.getElementById('games-played').textContent = progress.gamesPlayed || 0;
+                    document.getElementById('best-score').textContent = progress.bestScore || 0;
+                    this.updateAchievements(progress);
+                }
+            }
+
+            saveProgress() {
+                const saved = localStorage.getItem('catchThoughtProgress');
+                const progress = saved ? JSON.parse(saved) : { gamesPlayed: 0, bestScore: 0, achievements: [] };
+                
+                progress.gamesPlayed++;
+                if (this.score > progress.bestScore) {
+                    progress.bestScore = this.score;
+                }
+                
+                // Check for new achievements
+                this.checkAchievements(progress);
+                
+                localStorage.setItem('catchThoughtProgress', JSON.stringify(progress));
+                
+                document.getElementById('games-played').textContent = progress.gamesPlayed;
+                document.getElementById('best-score').textContent = progress.bestScore;
+                this.updateAchievements(progress);
+            }
+
+            checkAchievements(progress) {
+                const achievements = [
+                    { id: 'first_game', name: 'First Steps', condition: () => progress.gamesPlayed >= 1 },
+                    { id: 'score_100', name: 'Centurion', condition: () => progress.bestScore >= 100 },
+                    { id: 'score_200', name: 'Champion', condition: () => progress.bestScore >= 200 },
+                    { id: 'games_5', name: 'Dedicated', condition: () => progress.gamesPlayed >= 5 },
+                    { id: 'games_10', name: 'Committed', condition: () => progress.gamesPlayed >= 10 },
+                    { id: 'negative_10', name: 'Transformer', condition: () => this.negativeCaught >= 10 },
+                    { id: 'positive_15', name: 'Optimist', condition: () => this.positiveCaught >= 15 }
+                ];
+                
+                achievements.forEach(achievement => {
+                    if (achievement.condition() && !progress.achievements.includes(achievement.id)) {
+                        progress.achievements.push(achievement.id);
+                        this.showAchievementNotification(achievement.name);
+                    }
+                });
+            }
+
+            showAchievementNotification(name) {
+                const notification = document.createElement('div');
+                notification.style.position = 'fixed';
+                notification.style.top = '20px';
+                notification.style.right = '20px';
+                notification.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
+                notification.style.color = '#2d3748';
+                notification.style.padding = '15px 20px';
+                notification.style.borderRadius = '10px';
+                notification.style.fontWeight = 'bold';
+                notification.style.zIndex = '10000';
+                notification.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+                notification.textContent = `🏆 Achievement Unlocked: ${name}!`;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+
+            updateAchievements(progress) {
+                const achievementsDiv = document.getElementById('achievements');
+                const achievementNames = {
+                    'first_game': 'First Steps',
+                    'score_100': 'Centurion',
+                    'score_200': 'Champion',
+                    'games_5': 'Dedicated',
+                    'games_10': 'Committed',
+                    'negative_10': 'Transformer',
+                    'positive_15': 'Optimist'
+                };
+                
+                if (progress.achievements && progress.achievements.length > 0) {
+                    achievementsDiv.innerHTML = '<h5>Achievements:</h5>' +
+                        progress.achievements.map(id => 
+                            `<span class="achievement">${achievementNames[id] || id}</span>`
+                        ).join('');
+                } else {
+                    achievementsDiv.innerHTML = '<p>Play more to unlock achievements!</p>';
+                }
+            }
+        }
+
+        // Initialize game
+        const game = new CatchThoughtGame();
+
+        function startGame() { game.startGame(); }
+        function pauseGame() { game.pauseGame(); }
+        function resetGame() { game.resetGame(); }
+
+        // Initialize display
+        game.updateDisplay();
+        game.loadProgress();
+    </script>
+</body>
+</html>
