@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Maker - FeelSync</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/games.css">
+    <style>
+        .decision-game {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .scenario-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-top: 4px solid #667eea;
+        }
+
+        .scenario-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+
+        .scenario-description {
+            font-size: 1.1rem;
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .decision-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .decision-option {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+        }
+
+        .decision-option:hover {
+            background: #edf2f7;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.1);
+        }
+
+        .decision-option.selected {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .option-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-description {
+            font-size: 0.95rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .decision-option.selected .option-description {
+            opacity: 0.9;
+        }
+
+        .outcome-section {
+            background: #f0fff4;
+            border: 2px solid #48bb78;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            display: none;
+        }
+
+        .outcome-section.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        .outcome-title {
+            color: #2f855a;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .outcome-text {
+            color: #2d3748;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .reflection-section {
+            background: #fef5e7;
+            border: 2px solid #ed8936;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .reflection-title {
+            color: #c05621;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .reflection-questions {
+            list-style: none;
+            padding: 0;
+        }
+
+        .reflection-questions li {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ed8936;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .progress-tracker {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .scenario-counter {
+            text-align: center;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .skills-developed {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .skill-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .skill-item:last-child {
+            border-bottom: none;
+        }
+
+        .skill-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+
+        .skill-info h4 {
+            margin: 0 0 5px 0;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+
+        .skill-info p {
+            margin: 0;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .category-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .category-btn:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .category-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .completion-celebration {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px;
+            margin: 30px 0;
+            display: none;
+        }
+
+        .completion-celebration.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        .celebration-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">🌙</span>
+                <span class="brand-text">FeelSync</span>
+            </div>
+            <button onclick="window.location.href='../index.html'" class="btn btn-secondary">← Back to Dashboard</button>
+        </div>
+    </nav>
+
+    <div class="decision-game">
+        <div class="game-header">
+            <h1>🤔 Decision Maker</h1>
+            <p>Practice making thoughtful decisions in various life situations</p>
+        </div>
+
+        <div class="category-selector">
+            <button class="category-btn active" data-category="all">All Scenarios</button>
+            <button class="category-btn" data-category="social">Social</button>
+            <button class="category-btn" data-category="work">Work/Study</button>
+            <button class="category-btn" data-category="personal">Personal</button>
+            <button class="category-btn" data-category="health">Health</button>
+        </div>
+
+        <div class="progress-tracker">
+            <div class="scenario-counter">
+                <span id="current-scenario">0</span> of <span id="total-scenarios">0</span> scenarios completed
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div id="scenario-container">
+            <!-- Scenarios will be loaded here -->
+        </div>
+
+        <div class="game-controls">
+            <button onclick="previousScenario()" id="prev-btn" class="btn btn-secondary" disabled>Previous</button>
+            <button onclick="makeDecision()" id="decide-btn" class="btn btn-primary" disabled>Make Decision</button>
+            <button onclick="nextScenario()" id="next-btn" class="btn btn-primary" disabled>Next Scenario</button>
+            <button onclick="restartGame()" class="btn btn-secondary">Restart</button>
+        </div>
+
+        <div class="completion-celebration" id="completion-celebration">
+            <div class="celebration-icon">🎉</div>
+            <h2>Congratulations!</h2>
+            <p>You've completed all scenarios in this category!</p>
+            <p id="completion-stats"></p>
+            <button onclick="restartGame()" class="btn btn-primary">Play Again</button>
+        </div>
+
+        <div class="skills-developed">
+            <h3>Skills You're Developing:</h3>
+            <div class="skill-item">
+                <div class="skill-icon">🧠</div>
+                <div class="skill-info">
+                    <h4>Critical Thinking</h4>
+                    <p>Analyzing situations and considering multiple perspectives</p>
+                </div>
+            </div>
+            <div class="skill-item">
+                <div class="skill-icon">⚖️</div>
+                <div class="skill-info">
+                    <h4>Decision Making</h4>
+                    <p>Weighing pros and cons to make informed choices</p>
+                </div>
+            </div>
+            <div class="skill-item">
+                <div class="skill-icon">🎯</div>
+                <div class="skill-info">
+                    <h4>Problem Solving</h4>
+                    <p>Finding creative solutions to challenging situations</p>
+                </div>
+            </div>
+            <div class="skill-item">
+                <div class="skill-icon">💭</div>
+                <div class="skill-info">
+                    <h4>Self-Awareness</h4>
+                    <p>Understanding your values and decision-making patterns</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class DecisionMakerGame {
+            constructor() {
+                this.scenarios = [
+                    {
+                        id: 1,
+                        category: 'social',
+                        title: 'Friend Conflict Resolution',
+                        description: 'Your two best friends are in a heated argument and both want you to take sides. They\'re pressuring you to choose who is right.',
+                        options: [
+                            {
+                                title: '🤝 Stay Neutral',
+                                description: 'Refuse to take sides and encourage them to work it out together',
+                                outcome: 'Your friends initially feel unsupported, but they eventually respect your neutrality and work things out. Your friendship with both remains strong.',
+                                skills: ['diplomacy', 'boundary-setting']
+                            },
+                            {
+                                title: '⚖️ Mediate',
+                                description: 'Offer to help them communicate and find a solution',
+                                outcome: 'You successfully help them understand each other\'s perspectives. They reconcile and thank you for your help.',
+                                skills: ['communication', 'problem-solving']
+                            },
+                            {
+                                title: '🚶 Step Back',
+                                description: 'Tell them you need space until they resolve their conflict',
+                                outcome: 'They realize their argument is affecting others and quickly resolve it to maintain their friendships.',
+                                skills: ['self-care', 'boundary-setting']
+                            }
+                        ],
+                        reflection: [
+                            'How did your choice reflect your values?',
+                            'What did you learn about handling conflict?',
+                            'How might this approach work in other situations?'
+                        ]
+                    },
+                    {
+                        id: 2,
+                        category: 'work',
+                        title: 'Work-Life Balance Crisis',
+                        description: 'Your boss asks you to work overtime on a project that would mean missing your family dinner, but it could lead to a promotion.',
+                        options: [
+                            {
+                                title: '💼 Work Overtime',
+                                description: 'Stay late to complete the project and impress your boss',
+                                outcome: 'You complete the project successfully and get recognized, but your family feels neglected. You realize the importance of communicating better.',
+                                skills: ['career-focus', 'sacrifice-awareness']
+                            },
+                            {
+                                title: '🏠 Choose Family',
+                                description: 'Politely decline and attend the family dinner',
+                                outcome: 'Your family appreciates your presence, and your boss understands. You find ways to be more efficient during regular hours.',
+                                skills: ['priority-setting', 'work-life-balance']
+                            },
+                            {
+                                title: '⚡ Find Compromise',
+                                description: 'Suggest starting early tomorrow to meet both commitments',
+                                outcome: 'Your boss appreciates your proactive solution. You attend dinner and complete the project with better time management.',
+                                skills: ['creative-problem-solving', 'negotiation']
+                            }
+                        ],
+                        reflection: [
+                            'What are your core priorities in life?',
+                            'How can you better communicate your boundaries?',
+                            'What strategies help you balance different commitments?'
+                        ]
+                    },
+                    {
+                        id: 3,
+                        category: 'personal',
+                        title: 'Social Media Dilemma',
+                        description: 'You notice that social media is making you feel anxious and comparing yourself to others, but you don\'t want to miss out on connecting with friends.',
+                        options: [
+                            {
+                                title: '🔄 Take a Break',
+                                description: 'Temporarily deactivate your accounts for a digital detox',
+                                outcome: 'You feel more present and less anxious. You discover other ways to connect with friends and return with healthier habits.',
+                                skills: ['self-awareness', 'digital-wellness']
+                            },
+                            {
+                                title: '⚙️ Curate Your Feed',
+                                description: 'Unfollow accounts that make you feel bad and set time limits',
+                                outcome: 'Your social media experience becomes more positive and intentional. You maintain connections while protecting your mental health.',
+                                skills: ['boundary-setting', 'mindful-consumption']
+                            },
+                            {
+                                title: '📱 Switch Platforms',
+                                description: 'Use social media only for direct messaging with close friends',
+                                outcome: 'You maintain meaningful connections without the pressure of public posts. Your relationships become deeper and more authentic.',
+                                skills: ['intentional-living', 'relationship-focus']
+                            }
+                        ],
+                        reflection: [
+                            'What triggers your social media anxiety?',
+                            'How do you want technology to fit into your life?',
+                            'What are healthier ways to connect with others?'
+                        ]
+                    },
+                    {
+                        id: 4,
+                        category: 'health',
+                        title: 'Mental Health Support',
+                        description: 'You\'ve been feeling overwhelmed and anxious for weeks. A friend suggests you should \'just think positive,\' but you think you might need professional help.',
+                        options: [
+                            {
+                                title: '🩺 Seek Professional Help',
+                                description: 'Schedule an appointment with a counselor or therapist',
+                                outcome: 'You learn valuable coping strategies and feel supported. Your mental health improves significantly with professional guidance.',
+                                skills: ['help-seeking', 'self-advocacy']
+                            },
+                            {
+                                title: '📚 Self-Help Approach',
+                                description: 'Try meditation apps, books, and wellness techniques first',
+                                outcome: 'You develop some helpful habits but realize that professional support would be beneficial for deeper issues.',
+                                skills: ['self-reliance', 'resource-finding']
+                            },
+                            {
+                                title: '🤝 Peer Support',
+                                description: 'Join a support group or talk to trusted friends and family',
+                                outcome: 'You feel less alone and gain different perspectives, but recognize that some issues need professional expertise.',
+                                skills: ['community-building', 'vulnerability']
+                            }
+                        ],
+                        reflection: [
+                            'What barriers exist to seeking help?',
+                            'How can you prioritize your mental health?',
+                            'What support systems are available to you?'
+                        ]
+                    },
+                    {
+                        id: 5,
+                        category: 'social',
+                        title: 'Peer Pressure Situation',
+                        description: 'At a party, everyone is participating in an activity that makes you uncomfortable. People are encouraging you to join in, saying "everyone else is doing it."',
+                        options: [
+                            {
+                                title: '🚫 Politely Decline',
+                                description: 'Say no confidently and suggest an alternative activity',
+                                outcome: 'Some people respect your choice, and others follow your lead. You maintain your values and feel proud of your decision.',
+                                skills: ['assertiveness', 'leadership']
+                            },
+                            {
+                                title: '🚪 Leave the Situation',
+                                description: 'Make an excuse and leave the party early',
+                                outcome: 'You avoid the uncomfortable situation but miss out on positive social connections. You learn to plan exit strategies.',
+                                skills: ['self-protection', 'planning']
+                            },
+                            {
+                                title: '🗣️ Explain Your Values',
+                                description: 'Share why you\'re not comfortable and encourage others to think',
+                                outcome: 'You spark meaningful conversations and help others reflect on their choices. Some people thank you later.',
+                                skills: ['communication', 'influence']
+                            }
+                        ],
+                        reflection: [
+                            'What are your non-negotiable values?',
+                            'How can you prepare for peer pressure situations?',
+                            'What did you learn about authentic friendship?'
+                        ]
+                    }
+                ];
+                
+                this.currentScenarioIndex = 0;
+                this.selectedCategory = 'all';
+                this.filteredScenarios = [];
+                this.currentChoice = null;
+                this.completedScenarios = [];
+                
+                this.init();
+            }
+
+            init() {
+                this.filterScenarios();
+                this.setupEventListeners();
+                this.loadScenario();
+                this.loadProgress();
+            }
+
+            setupEventListeners() {
+                // Category buttons
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.selectedCategory = e.target.dataset.category;
+                        this.filterScenarios();
+                        this.currentScenarioIndex = 0;
+                        this.loadScenario();
+                        this.updateProgress();
+                    });
+                });
+            }
+
+            filterScenarios() {
+                if (this.selectedCategory === 'all') {
+                    this.filteredScenarios = [...this.scenarios];
+                } else {
+                    this.filteredScenarios = this.scenarios.filter(s => s.category === this.selectedCategory);
+                }
+            }
+
+            loadScenario() {
+                if (this.currentScenarioIndex >= this.filteredScenarios.length) {
+                    this.showCompletion();
+                    return;
+                }
+
+                const scenario = this.filteredScenarios[this.currentScenarioIndex];
+                const container = document.getElementById('scenario-container');
+                
+                container.innerHTML = `
+                    <div class="scenario-card">
+                        <div class="scenario-title">${scenario.title}</div>
+                        <div class="scenario-description">${scenario.description}</div>
+                        
+                        <div class="decision-options" id="decision-options">
+                            ${scenario.options.map((option, index) => `
+                                <div class="decision-option" data-option="${index}">
+                                    <div class="option-title">${option.title}</div>
+                                    <div class="option-description">${option.description}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="outcome-section" id="outcome-section">
+                            <div class="outcome-title">Outcome:</div>
+                            <div class="outcome-text" id="outcome-text"></div>
+                            
+                            <div class="reflection-section">
+                                <div class="reflection-title">💭 Reflection Questions:</div>
+                                <ul class="reflection-questions" id="reflection-questions"></ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Add click handlers to options
+                document.querySelectorAll('.decision-option').forEach(option => {
+                    option.addEventListener('click', () => {
+                        document.querySelectorAll('.decision-option').forEach(o => o.classList.remove('selected'));
+                        option.classList.add('selected');
+                        this.currentChoice = parseInt(option.dataset.option);
+                        document.getElementById('decide-btn').disabled = false;
+                    });
+                });
+
+                this.updateProgress();
+                this.updateButtons();
+            }
+
+            makeDecision() {
+                if (this.currentChoice === null) return;
+
+                const scenario = this.filteredScenarios[this.currentScenarioIndex];
+                const chosenOption = scenario.options[this.currentChoice];
+                
+                // Show outcome
+                document.getElementById('outcome-text').textContent = chosenOption.outcome;
+                document.getElementById('reflection-questions').innerHTML = 
+                    scenario.reflection.map(question => `<li>${question}</li>`).join('');
+                
+                document.getElementById('outcome-section').classList.add('show');
+                
+                // Record the choice
+                this.completedScenarios.push({
+                    scenarioId: scenario.id,
+                    choice: this.currentChoice,
+                    skills: chosenOption.skills
+                });
+
+                // Update buttons
+                document.getElementById('decide-btn').disabled = true;
+                document.getElementById('next-btn').disabled = false;
+                
+                this.saveProgress();
+            }
+
+            nextScenario() {
+                this.currentScenarioIndex++;
+                this.currentChoice = null;
+                
+                if (this.currentScenarioIndex >= this.filteredScenarios.length) {
+                    this.showCompletion();
+                } else {
+                    this.loadScenario();
+                }
+            }
+
+            previousScenario() {
+                if (this.currentScenarioIndex > 0) {
+                    this.currentScenarioIndex--;
+                    this.currentChoice = null;
+                    this.loadScenario();
+                }
+            }
+
+            updateProgress() {
+                const current = Math.min(this.currentScenarioIndex + 1, this.filteredScenarios.length);
+                const total = this.filteredScenarios.length;
+                const percentage = (this.currentScenarioIndex / total) * 100;
+
+                document.getElementById('current-scenario').textContent = current;
+                document.getElementById('total-scenarios').textContent = total;
+                document.getElementById('progress-fill').style.width = percentage + '%';
+            }
+
+            updateButtons() {
+                document.getElementById('prev-btn').disabled = this.currentScenarioIndex === 0;
+                document.getElementById('decide-btn').disabled = this.currentChoice === null;
+                document.getElementById('next-btn').disabled = true;
+            }
+
+            showCompletion() {
+                document.getElementById('scenario-container').style.display = 'none';
+                document.getElementById('completion-celebration').classList.add('show');
+                
+                const completedCount = this.completedScenarios.filter(s => 
+                    this.filteredScenarios.some(fs => fs.id === s.scenarioId)
+                ).length;
+                
+                document.getElementById('completion-stats').innerHTML = `
+                    <p>You completed <strong>${completedCount}</strong> scenarios!</p>
+                    <p>You've practiced valuable decision-making skills and self-reflection.</p>
+                `;
+                
+                this.updateProgress();
+            }
+
+            restartGame() {
+                this.currentScenarioIndex = 0;
+                this.currentChoice = null;
+                this.completedScenarios = [];
+                
+                document.getElementById('scenario-container').style.display = 'block';
+                document.getElementById('completion-celebration').classList.remove('show');
+                
+                this.loadScenario();
+                this.saveProgress();
+            }
+
+            saveProgress() {
+                const progress = {
+                    completedScenarios: this.completedScenarios,
+                    lastPlayed: new Date().toISOString()
+                };
+                localStorage.setItem('decisionMakerProgress', JSON.stringify(progress));
+            }
+
+            loadProgress() {
+                const saved = localStorage.getItem('decisionMakerProgress');
+                if (saved) {
+                    const progress = JSON.parse(saved);
+                    this.completedScenarios = progress.completedScenarios || [];
+                }
+            }
+        }
+
+        // Initialize game
+        const game = new DecisionMakerGame();
+
+        // Global functions for buttons
+        function makeDecision() { game.makeDecision(); }
+        function nextScenario() { game.nextScenario(); }
+        function previousScenario() { game.previousScenario(); }
+        function restartGame() { game.restartGame(); }
+    </script>
+</body>
+</html>
