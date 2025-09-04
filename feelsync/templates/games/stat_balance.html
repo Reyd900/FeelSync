@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotional Balance Challenge - FeelSync</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-subtitle {
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--stat-color);
+        }
+
+        .stat-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .stat-bar-container {
+            background: #f0f0f0;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .stat-bar {
+            height: 100%;
+            background: var(--stat-color);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .stat-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .stat-value {
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .control-btn {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .control-btn:hover {
+            background: var(--stat-color);
+            border-color: var(--stat-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #6c5ce7, #74b9ff);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .balance-meter {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .balance-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 8px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            position: relative;
+            transition: all 0.5s ease;
+        }
+
+        .balance-circle.balanced {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #81C784, #4CAF50);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .balance-score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .balance-circle.balanced .balance-score {
+            color: white;
+        }
+
+        .message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .achievements {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .achievement-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .achievement-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .achievement {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievement.locked {
+            background: #ccc;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">🎯 Emotional Balance Challenge</h1>
+            <p class="game-subtitle">Balance your emotional stats to achieve perfect harmony</p>
+        </div>
+
+        <div class="game-info">
+            <div class="info-item">
+                <div class="info-label">Level</div>
+                <div class="info-value" id="level">1</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Score</div>
+                <div class="info-value" id="score">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Moves</div>
+                <div class="info-value" id="moves">30</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Target</div>
+                <div class="info-value" id="target">85%</div>
+            </div>
+        </div>
+
+        <div class="balance-meter">
+            <div class="balance-circle" id="balanceCircle">
+                <div class="balance-score" id="balanceScore">0%</div>
+            </div>
+            <div class="message info" id="gameMessage">
+                Adjust your emotional stats to achieve perfect balance! Each emotion affects the others.
+            </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be populated by JavaScript -->
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn" onclick="resetGame()">🔄 Reset</button>
+            <button class="btn secondary" onclick="nextLevel()">⬆️ Next Level</button>
+            <button class="btn" onclick="showTutorial()">❓ Tutorial</button>
+        </div>
+
+        <div class="achievements">
+            <div class="achievement-title">🏆 Achievements</div>
+            <div class="achievement-list" id="achievements">
+                <div class="achievement locked" id="ach-first-balance">First Balance</div>
+                <div class="achievement locked" id="ach-perfectionist">Perfectionist (100%)</div>
+                <div class="achievement locked" id="ach-efficient">Efficient (< 20 moves)</div>
+                <div class="achievement locked" id="ach-level5">Level 5 Master</div>
+                <div class="achievement locked" id="ach-streak">5 Level Streak</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class EmotionalBalanceGame {
+            constructor() {
+                this.stats = {
+                    happiness: { value: 50, color: '#FFD700', name: 'Happiness', emoji: '😊' },
+                    calm: { value: 50, color: '#87CEEB', name: 'Calm', emoji: '😌' },
+                    confidence: { value: 50, color: '#FF6B6B', name: 'Confidence', emoji: '💪' },
+                    focus: { value: 50, color: '#4ECDC4', name: 'Focus', emoji: '🎯' },
+                    energy: { value: 50, color: '#45B7D1', name: 'Energy', emoji: '⚡' },
+                    empathy: { value: 50, color: '#96CEB4', name: 'Empathy', emoji: '❤️' }
+                };
+
+                this.level = 1;
+                this.score = 0;
+                this.moves = 30;
+                this.targetBalance = 85;
+                this.achievements = {
+                    'first-balance': false,
+                    'perfectionist': false,
+                    'efficient': false,
+                    'level5': false,
+                    'streak': false
+                };
+                this.levelStreak = 0;
+
+                this.init();
+            }
+
+            init() {
+                this.renderStats();
+                this.updateDisplay();
+                this.addEventListeners();
+                this.showTutorial();
+            }
+
+            renderStats() {
+                const grid = document.getElementById('statsGrid');
+                grid.innerHTML = '';
+
+                Object.entries(this.stats).forEach(([key, stat]) => {
+                    const card = document.createElement('div');
+                    card.className = 'stat-card';
+                    card.style.setProperty('--stat-color', stat.color);
+
+                    card.innerHTML = `
+                        <div class="stat-name">${stat.emoji} ${stat.name}</div>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar" style="width: ${stat.value}%"></div>
+                        </div>
+                        <div class="stat-value">${stat.value}</div>
+                        <div class="controls">
+                            <button class="control-btn" onclick="game.adjustStat('${key}', -5)">−</button>
+                            <button class="control-btn" onclick="game.adjustStat('${key}', -1)">-</button>
+                            <button class="control-btn" onclick="game.adjustStat('${key}', 1)">+</button>
+                            <button class="control-btn" onclick="game.adjustStat('${key}', 5)">+</button>
+                        </div>
+                    `;
+
+                    grid.appendChild(card);
+                });
+            }
+
+            adjustStat(statName, change) {
+                if (this.moves <= 0) return;
+
+                const stat = this.stats[statName];
+                const oldValue = stat.value;
+                stat.value = Math.max(0, Math.min(100, stat.value + change));
+
+                if (oldValue !== stat.value) {
+                    this.moves--;
+                    this.applyStatInteractions(statName, change);
+                    this.updateDisplay();
+                    this.checkGameState();
+                }
+            }
+
+            applyStatInteractions(changedStat, change) {
+                // Define stat relationships
+                const interactions = {
+                    happiness: { calm: 0.3, confidence: 0.2, energy: 0.4 },
+                    calm: { happiness: 0.2, focus: 0.5, confidence: 0.1 },
+                    confidence: { happiness: 0.3, energy: 0.2, empathy: -0.1 },
+                    focus: { calm: 0.3, energy: -0.2, empathy: -0.1 },
+                    energy: { happiness: 0.2, confidence: 0.3, calm: -0.3 },
+                    empathy: { happiness: 0.2, calm: 0.3, confidence: -0.1 }
+                };
+
+                const relations = interactions[changedStat];
+                if (!relations) return;
+
+                Object.entries(relations).forEach(([targetStat, multiplier]) => {
+                    const effect = change * multiplier;
+                    this.stats[targetStat].value = Math.max(0, Math.min(100, 
+                        this.stats[targetStat].value + effect));
+                });
+            }
+
+            calculateBalance() {
+                const values = Object.values(this.stats).map(s => s.value);
+                const avg = values.reduce((a, b) => a + b) / values.length;
+                const variance = values.reduce((acc, val) => acc + Math.pow(val - avg, 2), 0) / values.length;
+                const balance = Math.max(0, 100 - Math.sqrt(variance));
+                return Math.round(balance);
+            }
+
+            updateDisplay() {
+                const balance = this.calculateBalance();
+                
+                document.getElementById('level').textContent = this.level;
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('moves').textContent = this.moves;
+                document.getElementById('target').textContent = `${this.targetBalance}%`;
+                document.getElementById('balanceScore').textContent = `${balance}%`;
+
+                const circle = document.getElementById('balanceCircle');
+                if (balance >= this.targetBalance) {
+                    circle.classList.add('balanced');
+                } else {
+                    circle.classList.remove('balanced');
+                }
+
+                // Update stat displays
+                Object.entries(this.stats).forEach(([key, stat]) => {
+                    const card = document.querySelector(`[onclick*="'${key}'"]`).closest('.stat-card');
+                    const bar = card.querySelector('.stat-bar');
+                    const value = card.querySelector('.stat-value');
+                    
+                    bar.style.width = `${stat.value}%`;
+                    value.textContent = stat.value;
+                });
+
+                this.updateMessage(balance);
+            }
+
+            updateMessage(balance) {
+                const message = document.getElementById('gameMessage');
+                
+                if (this.moves <= 0) {
+                    if (balance >= this.targetBalance) {
+                        message.className = 'message success';
+                        message.textContent = `🎉 Level Complete! Perfect balance achieved with ${balance}% harmony!`;
+                    } else {
+                        message.className = 'message warning';
+                        message.textContent = `💪 Good effort! You achieved ${balance}% balance. Try again for ${this.targetBalance}%!`;
+                    }
+                } else if (balance >= this.targetBalance) {
+                    message.className = 'message success';
+                    message.textContent = `✨ Perfect Balance Achieved! You have ${this.moves} moves left to optimize further!`;
+                } else if (balance >= this.targetBalance - 10) {
+                    message.className = 'message info';
+                    message.textContent = `🎯 Almost there! You need ${this.targetBalance - balance}% more balance. ${this.moves} moves remaining.`;
+                } else {
+                    message.className = 'message info';
+                    message.textContent = `🎮 Keep balancing! Current harmony: ${balance}%. Target: ${this.targetBalance}%. ${this.moves} moves left.`;
+                }
+            }
+
+            checkGameState() {
+                const balance = this.calculateBalance();
+                
+                if (balance >= this.targetBalance) {
+                    this.checkAchievements(balance);
+                    
+                    if (this.moves > 0) {
+                        // Bonus points for finishing with moves left
+                        const moveBonus = this.moves * 10;
+                        this.score += 100 + moveBonus;
+                    } else {
+                        this.score += 100;
+                    }
+                }
+
+                if (this.moves <= 0) {
+                    setTimeout(() => {
+                        if (balance >= this.targetBalance) {
+                            this.levelStreak++;
+                            this.nextLevel();
+                        } else {
+                            this.levelStreak = 0;
+                            if (confirm('Level failed! Would you like to try again?')) {
+                                this.resetLevel();
+                            }
+                        }
+                    }, 2000);
+                }
+            }
+
+            checkAchievements(balance) {
+                if (!this.achievements['first-balance']) {
+                    this.achievements['first-balance'] = true;
+                    this.unlockAchievement('ach-first-balance', 'First Balance');
+                }
+
+                if (balance === 100 && !this.achievements['perfectionist']) {
+                    this.achievements['perfectionist'] = true;
+                    this.unlockAchievement('ach-perfectionist', 'Perfectionist');
+                }
+
+                if (this.moves > 10 && !this.achievements['efficient']) {
+                    this.achievements['efficient'] = true;
+                    this.unlockAchievement('ach-efficient', 'Efficient');
+                }
+
+                if (this.level >= 5 && !this.achievements['level5']) {
+                    this.achievements['level5'] = true;
+                    this.unlockAchievement('ach-level5', 'Level 5 Master');
+                }
+
+                if (this.levelStreak >= 4 && !this.achievements['streak']) {
+                    this.achievements['streak'] = true;
+                    this.unlockAchievement('ach-streak', '5 Level Streak');
+                }
+            }
+
+            unlockAchievement(elementId, name) {
+                const element = document.getElementById(elementId);
+                element.classList.remove('locked');
+                
+                // Show notification
+                setTimeout(() => {
+                    alert(`🏆 Achievement Unlocked: ${name}!`);
+                }, 500);
+            }
+
+            nextLevel() {
+                this.level++;
+                this.targetBalance = Math.min(95, 80 + this.level * 2);
+                this.moves = Math.max(15, 35 - this.level);
+                this.resetStats();
+            }
+
+            resetLevel() {
+                this.moves = Math.max(15, 35 - this.level);
+                this.resetStats();
+            }
+
+            resetStats() {
+                // Add some randomization for higher levels
+                const randomFactor = this.level > 3 ? 20 : 10;
+                
+                Object.values(this.stats).forEach(stat => {
+                    stat.value = 50 + (Math.random() - 0.5) * randomFactor;
+                    stat.value = Math.max(20, Math.min(80, stat.value));
+                    stat.value = Math.round(stat.value);
+                });
+
+                this.updateDisplay();
+            }
+
+            resetGame() {
+                this.level = 1;
+                this.score = 0;
+                this.moves = 30;
+                this.targetBalance = 85;
+                this.levelStreak = 0;
+                this.resetStats();
+            }
+
+            showTutorial() {
+                alert(`🎮 Welcome to Emotional Balance Challenge!
+
+🎯 GOAL: Balance all your emotional stats to achieve ${this.targetBalance}% harmony
+
+🎲 HOW TO PLAY:
+• Use +/- buttons to adjust each emotion
+• Each emotion affects others (watch the interactions!)
+• Complete the level within the move limit
+
+💡 TIPS:
+• Happiness boosts Calm and Energy
+• Calm improves Focus
+• Energy can reduce Calm
+• Focus and Empathy have trade-offs
+
+🏆 Achieve perfect balance and unlock achievements!`);
+            }
+
+            addEventListeners() {
+                // Add keyboard controls
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'r' || e.key === 'R') {
+                        this.resetGame();
+                    } else if (e.key === 'n' || e.key === 'N') {
+                        this.nextLevel();
+                    } else if (e.key === 'h' || e.key === 'H') {
+                        this.showTutorial();
+                    }
+                });
+            }
+        }
+
+        // Initialize game
+        let game;
+        window.addEventListener('load', () => {
+            game = new EmotionalBalanceGame();
+        });
+
+        // Global functions for HTML onclick events
+        function resetGame() {
+            game.resetGame();
+        }
+
+        function nextLevel() {
+            game.nextLevel();
+        }
+
+        function showTutorial() {
+            game.showTutorial();
+        }
+    </script>
+</body>
+</html>
