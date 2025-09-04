@@ -1,0 +1,722 @@
+{
+  "patterns": {
+    "sleep_mood_correlation": {
+      "name": "Sleep-Mood Correlation",
+      "description": "Strong correlation between sleep duration/quality and next-day mood",
+      "detection_criteria": {
+        "min_correlation": 0.7,
+        "min_data_points": 7,
+        "variables": ["sleep_hours", "mood_score"]
+      },
+      "risk_levels": {
+        "low": {
+          "sleep_threshold": 7.0,
+          "consistency": 0.8,
+          "description": "Consistent good sleep patterns"
+        },
+        "medium": {
+          "sleep_threshold": 6.0,
+          "consistency": 0.6,
+          "description": "Irregular sleep affecting mood"
+        },
+        "high": {
+          "sleep_threshold": 5.0,
+          "consistency": 0.4,
+          "description": "Chronic sleep deprivation impacting wellbeing"
+        }
+      },
+      "interventions": [
+        "Sleep hygiene education",
+        "Bedtime routine establishment",
+        "Sleep tracking implementation",
+        "Referral to sleep specialist if needed"
+      ]
+    },
+    "stress_spiral": {
+      "name": "Stress Spiral Pattern",
+      "description": "Escalating stress levels with decreasing coping strategies",
+      "detection_criteria": {
+        "stress_increase_threshold": 2.0,
+        "mood_decrease_threshold": -1.0,
+        "time_window_days": 7,
+        "variables": ["stress_level", "mood_score", "exercise_minutes", "social_interaction"]
+      },
+      "risk_levels": {
+        "low": {
+          "stress_level": 3.0,
+          "coping_activities": 2,
+          "description": "Manageable stress with active coping"
+        },
+        "medium": {
+          "stress_level": 5.0,
+          "coping_activities": 1,
+          "description": "Elevated stress, reduced coping mechanisms"
+        },
+        "high": {
+          "stress_level": 7.0,
+          "coping_activities": 0,
+          "description": "High stress with minimal coping strategies"
+        }
+      },
+      "interventions": [
+        "Stress management techniques",
+        "Cognitive behavioral therapy",
+        "Relaxation training",
+        "Social support activation"
+      ]
+    },
+    "social_isolation": {
+      "name": "Social Isolation Pattern",
+      "description": "Decreasing social interaction correlated with mood decline",
+      "detection_criteria": {
+        "social_threshold": 1.0,
+        "mood_correlation": -0.6,
+        "duration_days": 5,
+        "variables": ["social_interaction", "mood_score", "family_time"]
+      },
+      "risk_levels": {
+        "low": {
+          "social_interaction": 2.0,
+          "frequency": "daily",
+          "description": "Regular social connections maintained"
+        },
+        "medium": {
+          "social_interaction": 1.0,
+          "frequency": "few_times_week",
+          "description": "Limited but present social engagement"
+        },
+        "high": {
+          "social_interaction": 0.5,
+          "frequency": "rarely",
+          "description": "Significant social withdrawal"
+        }
+      },
+      "interventions": [
+        "Social skills training",
+        "Group therapy participation",
+        "Community engagement activities",
+        "Family therapy if applicable"
+      ]
+    },
+    "exercise_mood_boost": {
+      "name": "Exercise-Mood Boost Pattern",
+      "description": "Positive correlation between physical activity and mood improvement",
+      "detection_criteria": {
+        "min_correlation": 0.6,
+        "exercise_threshold": 20,
+        "mood_improvement": 0.5,
+        "variables": ["exercise_minutes", "mood_score", "intensity"]
+      },
+      "risk_levels": {
+        "low": {
+          "exercise_minutes": 30,
+          "frequency": "daily",
+          "description": "Regular exercise routine maintained"
+        },
+        "medium": {
+          "exercise_minutes": 15,
+          "frequency": "few_times_week",
+          "description": "Inconsistent exercise patterns"
+        },
+        "high": {
+          "exercise_minutes": 5,
+          "frequency": "rarely",
+          "description": "Sedentary lifestyle impacting mood"
+        }
+      },
+      "interventions": [
+        "Gradual exercise program",
+        "Activity scheduling",
+        "Fitness goal setting",
+        "Group exercise classes"
+      ]
+    },
+    "weekend_recovery": {
+      "name": "Weekend Recovery Pattern",
+      "description": "Consistent mood improvement during weekends vs weekdays",
+      "detection_criteria": {
+        "weekend_mood_boost": 1.0,
+        "weekday_stress": 4.0,
+        "consistency": 0.8,
+        "variables": ["day_of_week", "mood_score", "work_hours", "stress_level"]
+      },
+      "risk_levels": {
+        "low": {
+          "weekday_mood": 4.0,
+          "work_stress": 3.0,
+          "description": "Good work-life balance maintained"
+        },
+        "medium": {
+          "weekday_mood": 3.0,
+          "work_stress": 5.0,
+          "description": "Work stress affecting wellbeing"
+        },
+        "high": {
+          "weekday_mood": 2.0,
+          "work_stress": 7.0,
+          "description": "Severe work-related mood impact"
+        }
+      },
+      "interventions": [
+        "Work-life balance coaching",
+        "Time management strategies",
+        "Workplace stress reduction",
+        "Career counseling if needed"
+      ]
+    },
+    "weather_sensitivity": {
+      "name": "Weather Sensitivity Pattern",
+      "description": "Mood fluctuations correlated with weather conditions",
+      "detection_criteria": {
+        "weather_correlation": -0.5,
+        "seasonal_variation": true,
+        "rainy_day_impact": -1.0,
+        "variables": ["weather_condition", "mood_score", "season"]
+      },
+      "risk_levels": {
+        "low": {
+          "weather_impact": 0.5,
+          "coping_strategies": 2,
+          "description": "Mild weather sensitivity with coping"
+        },
+        "medium": {
+          "weather_impact": 1.0,
+          "coping_strategies": 1,
+          "description": "Moderate weather-related mood changes"
+        },
+        "high": {
+          "weather_impact": 2.0,
+          "coping_strategies": 0,
+          "description": "Significant weather-dependent mood swings"
+        }
+      },
+      "interventions": [
+        "Light therapy for seasonal patterns",
+        "Indoor activity planning",
+        "Vitamin D supplementation",
+        "Mindfulness for weather acceptance"
+      ]
+    },
+    "creative_expression": {
+      "name": "Creative Expression Pattern",
+      "description": "Correlation between creative activities and mood enhancement",
+      "detection_criteria": {
+        "creativity_correlation": 0.6,
+        "min_creativity_time": 1.0,
+        "mood_boost": 0.8,
+        "variables": ["creativity_time", "mood_score", "intensity"]
+      },
+      "risk_levels": {
+        "low": {
+          "creativity_time": 2.0,
+          "frequency": "regular",
+          "description": "Active creative engagement"
+        },
+        "medium": {
+          "creativity_time": 1.0,
+          "frequency": "occasional",
+          "description": "Limited creative expression"
+        },
+        "high": {
+          "creativity_time": 0.2,
+          "frequency": "rare",
+          "description": "Lack of creative outlets"
+        }
+      },
+      "interventions": [
+        "Art therapy sessions",
+        "Creative hobby exploration",
+        "Expressive writing exercises",
+        "Music or dance therapy"
+      ]
+    },
+    "financial_stress_impact": {
+      "name": "Financial Stress Impact",
+      "description": "Financial concerns affecting overall mental wellbeing",
+      "detection_criteria": {
+        "financial_stress_threshold": 4.0,
+        "mood_correlation": -0.7,
+        "duration_consistency": 0.8,
+        "variables": ["financial_stress", "mood_score", "stress_level"]
+      },
+      "risk_levels": {
+        "low": {
+          "financial_stress": 2.0,
+          "impact_on_mood": 0.5,
+          "description": "Minor financial concerns"
+        },
+        "medium": {
+          "financial_stress": 4.0,
+          "impact_on_mood": 1.0,
+          "description": "Moderate financial stress affecting mood"
+        },
+        "high": {
+          "financial_stress": 6.0,
+          "impact_on_mood": 2.0,
+          "description": "Severe financial stress dominating thoughts"
+        }
+      },
+      "interventions": [
+        "Financial counseling referral",
+        "Budgeting assistance",
+        "Stress management for financial concerns",
+        "Resource connection for financial aid"
+      ]
+    },
+    "health_mood_connection": {
+      "name": "Physical Health-Mood Connection",
+      "description": "Physical health status directly impacting emotional wellbeing",
+      "detection_criteria": {
+        "health_correlation": 0.8,
+        "illness_mood_drop": -1.5,
+        "recovery_mood_boost": 1.0,
+        "variables": ["health_status", "mood_score", "energy_level"]
+      },
+      "risk_levels": {
+        "low": {
+          "health_status": "excellent",
+          "mood_stability": 0.9,
+          "description": "Good physical health supporting mood"
+        },
+        "medium": {
+          "health_status": "fair",
+          "mood_stability": 0.6,
+          "description": "Health concerns affecting emotional state"
+        },
+        "high": {
+          "health_status": "poor",
+          "mood_stability": 0.3,
+          "description": "Health issues significantly impacting mood"
+        }
+      },
+      "interventions": [
+        "Integrated medical-mental health care",
+        "Health behavior modification",
+        "Pain management strategies",
+        "Chronic illness support groups"
+      ]
+    }
+  },
+  "pattern_combinations": {
+    "complex_stress_pattern": {
+      "name": "Complex Stress Pattern",
+      "description": "Multiple stressors creating compounding effects",
+      "required_patterns": ["stress_spiral", "sleep_mood_correlation", "social_isolation"],
+      "risk_multiplier": 1.5,
+      "interventions": [
+        "Comprehensive stress management program",
+        "Multi-modal therapy approach",
+        "Crisis intervention planning",
+        "Intensive case management"
+      ]
+    },
+    "seasonal_affective_pattern": {
+      "name": "Seasonal Affective Pattern",
+      "description": "Weather sensitivity combined with social withdrawal",
+      "required_patterns": ["weather_sensitivity", "social_isolation"],
+      "seasonal_dependency": true,
+      "interventions": [
+        "Seasonal depression treatment",
+        "Light therapy combined with social activation",
+        "Seasonal activity planning",
+        "Support group for seasonal depression"
+      ]
+    },
+    "lifestyle_imbalance": {
+      "name": "Lifestyle Imbalance Pattern",
+      "description": "Poor work-life balance affecting multiple life areas",
+      "required_patterns": ["weekend_recovery", "exercise_mood_boost", "creative_expression"],
+      "holistic_approach": true,
+      "interventions": [
+        "Comprehensive lifestyle coaching",
+        "Work-life balance intervention",
+        "Holistic wellness program",
+        "Time management and priority setting"
+      ]
+    }
+  },
+  "therapeutic_insights": {
+    "positive_indicators": [
+      {
+        "pattern": "consistent_sleep",
+        "description": "Regular sleep patterns with 7-9 hours nightly",
+        "mood_impact": 1.2,
+        "stability_factor": 0.9
+      },
+      {
+        "pattern": "regular_exercise",
+        "description": "Consistent physical activity 3+ times per week",
+        "mood_impact": 1.0,
+        "resilience_factor": 0.8
+      },
+      {
+        "pattern": "strong_social_connections",
+        "description": "Regular meaningful social interactions",
+        "mood_impact": 0.9,
+        "support_factor": 1.0
+      },
+      {
+        "pattern": "creative_engagement",
+        "description": "Regular participation in creative activities",
+        "mood_impact": 0.8,
+        "fulfillment_factor": 0.9
+      },
+      {
+        "pattern": "stress_management",
+        "description": "Active use of healthy coping strategies",
+        "mood_impact": 1.1,
+        "resilience_factor": 1.0
+      }
+    ],
+    "warning_signs": [
+      {
+        "pattern": "declining_engagement",
+        "description": "Decreasing app usage and mood tracking",
+        "risk_level": "medium",
+        "intervention_urgency": "moderate"
+      },
+      {
+        "pattern": "mood_volatility",
+        "description": "Extreme mood swings within short periods",
+        "risk_level": "high",
+        "intervention_urgency": "immediate"
+      },
+      {
+        "pattern": "social_withdrawal",
+        "description": "Consistent reduction in social activities",
+        "risk_level": "medium",
+        "intervention_urgency": "moderate"
+      },
+      {
+        "pattern": "sleep_disruption",
+        "description": "Persistent sleep problems affecting daily function",
+        "risk_level": "high",
+        "intervention_urgency": "prompt"
+      },
+      {
+        "pattern": "chronic_low_mood",
+        "description": "Mood scores below 3.0 for 2+ weeks",
+        "risk_level": "high",
+        "intervention_urgency": "immediate"
+      }
+    ]
+  },
+  "intervention_recommendations": {
+    "immediate_interventions": [
+      {
+        "name": "Crisis Support Activation",
+        "triggers": ["mood_score < 2.0", "suicidal_ideation", "severe_mood_volatility"],
+        "actions": [
+          "Contact emergency services if imminent danger",
+          "Activate crisis support team",
+          "Implement safety planning",
+          "Increase monitoring frequency to daily"
+        ],
+        "resources": [
+          "988 Suicide & Crisis Lifeline",
+          "Crisis Text Line: Text HOME to 741741",
+          "Local emergency services",
+          "Trusted emergency contact"
+        ]
+      },
+      {
+        "name": "Urgent Clinical Review",
+        "triggers": ["chronic_low_mood", "severe_sleep_disruption", "complete_social_withdrawal"],
+        "actions": [
+          "Schedule urgent clinical appointment",
+          "Review medication if applicable",
+          "Assess need for intensive treatment",
+          "Coordinate with healthcare team"
+        ],
+        "timeframe": "within_24_hours"
+      }
+    ],
+    "short_term_interventions": [
+      {
+        "name": "Sleep Hygiene Protocol",
+        "duration": "2_weeks",
+        "components": [
+          "Establish consistent sleep schedule",
+          "Create optimal sleep environment",
+          "Limit screen time before bed",
+          "Track sleep patterns daily"
+        ],
+        "success_metrics": ["sleep_hours > 7", "mood_improvement > 0.5"]
+      },
+      {
+        "name": "Stress Reduction Program",
+        "duration": "4_weeks",
+        "components": [
+          "Daily breathing exercises (10+ minutes)",
+          "Progressive muscle relaxation",
+          "Stress identification and management",
+          "Cognitive restructuring techniques"
+        ],
+        "success_metrics": ["stress_level < 4", "breathing_minutes > 10"]
+      },
+      {
+        "name": "Social Reconnection Plan",
+        "duration": "3_weeks",
+        "components": [
+          "Schedule one social activity weekly",
+          "Reach out to one person daily",
+          "Join community or support group",
+          "Practice social skills if needed"
+        ],
+        "success_metrics": ["social_interaction > 2", "mood_stability improved"]
+      }
+    ],
+    "long_term_interventions": [
+      {
+        "name": "Lifestyle Balance Program",
+        "duration": "12_weeks",
+        "components": [
+          "Establish exercise routine (3x/week minimum)",
+          "Work-life balance strategies",
+          "Creative hobby development",
+          "Stress management skill building"
+        ],
+        "success_metrics": ["overall_mood > 4.0", "consistency > 0.8"]
+      },
+      {
+        "name": "Cognitive Behavioral Therapy",
+        "duration": "16_weeks",
+        "components": [
+          "Thought pattern identification",
+          "Behavioral activation strategies",
+          "Problem-solving skills development",
+          "Relapse prevention planning"
+        ],
+        "success_metrics": ["mood_volatility reduced", "coping_skills improved"]
+      },
+      {
+        "name": "Mindfulness-Based Intervention",
+        "duration": "8_weeks",
+        "components": [
+          "Daily meditation practice",
+          "Mindful awareness exercises",
+          "Acceptance and commitment strategies",
+          "Present-moment focus techniques"
+        ],
+        "success_metrics": ["breathing_consistency", "stress_resilience"]
+      }
+    ],
+    "maintenance_strategies": [
+      {
+        "name": "Ongoing Monitoring",
+        "frequency": "daily",
+        "activities": [
+          "Mood tracking consistency",
+          "Pattern recognition alerts",
+          "Early warning sign detection",
+          "Progress celebration"
+        ]
+      },
+      {
+        "name": "Booster Sessions",
+        "frequency": "monthly",
+        "activities": [
+          "Review coping strategies",
+          "Adjust intervention plans",
+          "Address emerging challenges",
+          "Reinforce positive patterns"
+        ]
+      },
+      {
+        "name": "Support Network Maintenance",
+        "frequency": "weekly",
+        "activities": [
+          "Check in with support persons",
+          "Attend support groups if applicable",
+          "Maintain therapeutic relationships",
+          "Engage in meaningful activities"
+        ]
+      }
+    ]
+  },
+  "risk_assessment_criteria": {
+    "low_risk": {
+      "mood_range": [3.5, 5.0],
+      "consistency": "> 0.8",
+      "coping_mechanisms": "> 2 active",
+      "social_support": "adequate",
+      "sleep_quality": "good",
+      "monitoring_frequency": "weekly"
+    },
+    "moderate_risk": {
+      "mood_range": [2.5, 3.4],
+      "consistency": "0.5 - 0.8",
+      "coping_mechanisms": "1-2 active",
+      "social_support": "limited",
+      "sleep_quality": "fair",
+      "monitoring_frequency": "twice_weekly"
+    },
+    "high_risk": {
+      "mood_range": [1.0, 2.4],
+      "consistency": "< 0.5",
+      "coping_mechanisms": "< 1 active",
+      "social_support": "minimal",
+      "sleep_quality": "poor",
+      "monitoring_frequency": "daily"
+    },
+    "crisis_risk": {
+      "mood_range": [0, 1.0],
+      "consistency": "erratic",
+      "coping_mechanisms": "none functioning",
+      "social_support": "absent",
+      "sleep_quality": "severely disrupted",
+      "monitoring_frequency": "continuous"
+    }
+  },
+  "outcome_predictors": {
+    "positive_outcomes": [
+      {
+        "factor": "treatment_engagement",
+        "weight": 0.3,
+        "description": "Active participation in therapeutic activities"
+      },
+      {
+        "factor": "social_support_quality",
+        "weight": 0.25,
+        "description": "Presence of meaningful relationships"
+      },
+      {
+        "factor": "coping_skill_development",
+        "weight": 0.2,
+        "description": "Learning and applying healthy coping strategies"
+      },
+      {
+        "factor": "lifestyle_factors",
+        "weight": 0.15,
+        "description": "Sleep, exercise, and nutrition habits"
+      },
+      {
+        "factor": "insight_and_awareness",
+        "weight": 0.1,
+        "description": "Understanding of patterns and triggers"
+      }
+    ],
+    "negative_predictors": [
+      {
+        "factor": "substance_use",
+        "weight": 0.4,
+        "description": "Problematic alcohol or drug use"
+      },
+      {
+        "factor": "trauma_history",
+        "weight": 0.3,
+        "description": "Unresolved traumatic experiences"
+      },
+      {
+        "factor": "chronic_stressors",
+        "weight": 0.2,
+        "description": "Ongoing financial, health, or relationship problems"
+      },
+      {
+        "factor": "treatment_resistance",
+        "weight": 0.1,
+        "description": "Reluctance to engage in therapeutic activities"
+      }
+    ]
+  },
+  "personalization_factors": {
+    "demographic_considerations": [
+      {
+        "factor": "age_group",
+        "categories": ["adolescent", "young_adult", "middle_aged", "older_adult"],
+        "intervention_modifications": {
+          "adolescent": ["peer_support_emphasis", "family_involvement", "school_coordination"],
+          "young_adult": ["career_stress_focus", "relationship_skills", "independence_building"],
+          "middle_aged": ["work_life_balance", "family_responsibilities", "health_concerns"],
+          "older_adult": ["social_isolation_prevention", "health_integration", "legacy_focus"]
+        }
+      },
+      {
+        "factor": "cultural_background",
+        "considerations": [
+          "Culturally appropriate interventions",
+          "Language preferences",
+          "Family and community involvement",
+          "Religious or spiritual integration"
+        ]
+      }
+    ],
+    "individual_preferences": [
+      {
+        "learning_style": ["visual", "auditory", "kinesthetic"],
+        "intervention_adaptations": {
+          "visual": ["charts_graphs", "written_materials", "imagery_exercises"],
+          "auditory": ["verbal_processing", "music_therapy", "discussion_groups"],
+          "kinesthetic": ["movement_therapy", "hands_on_activities", "experiential_learning"]
+        }
+      },
+      {
+        "technology_comfort": ["high", "medium", "low"],
+        "delivery_methods": {
+          "high": ["app_based_interventions", "virtual_reality", "ai_coaching"],
+          "medium": ["basic_apps", "video_calls", "online_resources"],
+          "low": ["in_person_sessions", "paper_based_tools", "phone_support"]
+        }
+      }
+    ]
+  },
+  "measurement_tools": {
+    "primary_outcomes": [
+      {
+        "name": "Daily Mood Score",
+        "range": "1-5",
+        "frequency": "daily",
+        "clinical_significance": 0.5
+      },
+      {
+        "name": "Functional Impairment Scale",
+        "range": "0-10",
+        "frequency": "weekly",
+        "clinical_significance": 1.0
+      },
+      {
+        "name": "Quality of Life Index",
+        "range": "0-100",
+        "frequency": "monthly",
+        "clinical_significance": 10.0
+      }
+    ],
+    "secondary_outcomes": [
+      {
+        "name": "Sleep Quality Index",
+        "range": "0-21",
+        "frequency": "weekly"
+      },
+      {
+        "name": "Social Connection Scale",
+        "range": "1-7",
+        "frequency": "bi-weekly"
+      },
+      {
+        "name": "Coping Skills Inventory",
+        "range": "0-60",
+        "frequency": "monthly"
+      }
+    ]
+  },
+  "integration_points": {
+    "healthcare_systems": [
+      "Electronic health records integration",
+      "Provider dashboard access",
+      "Automated alerts for risk levels",
+      "Progress report generation"
+    ],
+    "community_resources": [
+      "Support group connections",
+      "Community mental health services",
+      "Crisis intervention services",
+      "Peer support networks"
+    ],
+    "family_involvement": [
+      "Family education modules",
+      "Communication skills training",
+      "Support person integration",
+      "Family therapy coordination"
+    ]
+  }
+}
