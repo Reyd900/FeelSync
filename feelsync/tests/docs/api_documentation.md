@@ -2,92 +2,42 @@
 
 ## Overview
 
-FeelSync provides a RESTful API for managing user accounts, game sessions, behavioral data collection, and mental health analysis. This documentation covers all available endpoints, request/response formats, and authentication requirements.
+FeelSync provides a comprehensive RESTful API for emotion tracking, mood analysis, and user management. The API supports JSON format for all requests and responses.
 
-## Base URL
+**Base URL:** `http://localhost:5000/api/v1`
 
-```
-Development: http://localhost:5000
-Production: https://api.feelsync.com
-```
+**Authentication:** Bearer Token (JWT)
+
+## Table of Contents
+
+1. [Authentication](#authentication)
+2. [User Management](#user-management)
+3. [Emotion Tracking](#emotion-tracking)
+4. [Mood Patterns](#mood-patterns)
+5. [Audio Processing](#audio-processing)
+6. [Analytics](#analytics)
+7. [Games](#games)
+8. [Error Handling](#error-handling)
+9. [Rate Limiting](#rate-limiting)
+10. [Examples](#examples)
+
+---
 
 ## Authentication
 
-FeelSync uses session-based authentication with CSRF protection enabled in production.
+### POST `/auth/register`
+Register a new user account.
 
-### Login
-```http
-POST /auth/login
-Content-Type: application/x-www-form-urlencoded
-
-username_or_email=user@example.com&password=secretpassword
-```
-
-### Logout
-```http
-GET /auth/logout
-```
-
-## API Endpoints
-
-### User Management
-
-#### Register New User
-```http
-POST /auth/register
-Content-Type: application/x-www-form-urlencoded
-
-username=johndoe&email=john@example.com&password=SecurePass123&confirm_password=SecurePass123&age=20&gender=male
-```
-
-**Response:**
+**Request Body:**
 ```json
 {
-  "success": true,
-  "message": "Registration successful",
-  "redirect": "/auth/login"
-}
-```
-
-#### Get User Profile
-```http
-GET /auth/profile
-Authorization: Required (session-based)
-```
-
-**Response:**
-```json
-{
-  "id": 1,
   "username": "johndoe",
   "email": "john@example.com",
-  "age": 20,
-  "gender": "male",
-  "created_at": "2025-01-15T10:30:00Z",
-  "total_sessions": 15,
-  "is_eligible_for_analysis": true
-}
-```
-
-#### Update Profile
-```http
-POST /auth/profile/edit
-Content-Type: application/x-www-form-urlencoded
-Authorization: Required
-
-gender=other&data_sharing_consent=true&analytics_consent=true
-```
-
-### Game Sessions
-
-#### Start Game Session
-```http
-POST /games/start_session
-Content-Type: application/json
-Authorization: Required
-
-{
-  "game_type": "catch_thought"
+  "password": "securepassword123",
+  "name": "John Doe",
+  "age": 28,
+  "occupation": "Software Engineer",
+  "location": "San Francisco"
 }
 ```
 
@@ -95,32 +45,26 @@ Authorization: Required
 ```json
 {
   "success": true,
-  "session_id": 12345,
-  "game_type": "catch_thought",
-  "started_at": "2025-01-15T14:30:00Z"
+  "message": "User registered successfully",
+  "user": {
+    "id": 1,
+    "username": "johndoe",
+    "email": "john@example.com",
+    "name": "John Doe",
+    "created_at": "2024-01-15T10:30:00Z"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
-#### End Game Session
-```http
-POST /games/end_session
-Content-Type: application/json
-Authorization: Required
+### POST `/auth/login`
+Authenticate user and receive access token.
 
+**Request Body:**
+```json
 {
-  "session_id": 12345,
-  "final_score": 150,
-  "level_reached": 3,
-  "accuracy": 0.85,
-  "average_reaction_time": 245.2,
-  "consistency_score": 0.78,
-  "decisions_made": 25,
-  "completed": true,
-  "behavioral_data": {
-    "total_positive_catches": 18,
-    "total_negative_catches": 12,
-    "missed_thoughts": 5
-  }
+  "username": "johndoe",
+  "password": "securepassword123"
 }
 ```
 
@@ -128,110 +72,358 @@ Authorization: Required
 ```json
 {
   "success": true,
-  "session_data": {
-    "score": 150,
-    "duration": 420,
-    "accuracy": 0.85,
-    "level_reached": 3
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "username": "johndoe",
+    "name": "John Doe"
   }
 }
 ```
 
-#### Log Behavioral Data
-```http
-POST /games/log_behavior
-Content-Type: application/json
-Authorization: Required
+### POST `/auth/refresh`
+Refresh access token.
 
-{
-  "session_id": 12345,
-  "reaction_time": 275.5,
-  "decision_type": "positive_catch",
-  "decision_value": "caught_positive_thought",
-  "confidence_level": 0.8,
-  "emotional_state": "focused",
-  "stress_level": 3,
-  "accuracy": true,
-  "hesitation_time": 150.2,
-  "game_level": 2,
-  "game_phase": "active_play",
-  "difficulty": "normal",
-  "metadata": {
-    "thought_category": "self_confidence",
-    "response_pattern": "quick_decisive"
-  }
-}
-```
+**Headers:** `Authorization: Bearer <token>`
 
-#### Get Game Scenarios
-```http
-GET /games/get_scenarios/{game_type}
-Authorization: Required
-```
-
-**Response for catch_thought:**
+**Response:**
 ```json
 {
-  "scenarios": {
-    "positive_thoughts": [
-      "I can handle this challenge",
-      "I'm learning something new",
-      "This is an opportunity to grow"
-    ],
-    "negative_thoughts": [
-      "This is too difficult for me",
-      "I always mess things up",
-      "Nobody understands me"
-    ],
-    "neutral_thoughts": [
-      "I need to focus on this task",
-      "What should I have for lunch?",
-      "The weather is changing"
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_at": "2024-01-16T10:30:00Z"
+}
+```
+
+### POST `/auth/logout`
+Logout user and invalidate token.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Logout successful"
+}
+```
+
+---
+
+## User Management
+
+### GET `/users/profile`
+Get current user profile.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:**
+```json
+{
+  "success": true,
+  "user": {
+    "id": 1,
+    "username": "johndoe",
+    "email": "john@example.com",
+    "name": "John Doe",
+    "age": 28,
+    "occupation": "Software Engineer",
+    "location": "San Francisco",
+    "created_at": "2024-01-15T10:30:00Z",
+    "last_active": "2024-01-20T14:45:00Z"
+  }
+}
+```
+
+### PUT `/users/profile`
+Update user profile.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "name": "John Smith",
+  "age": 29,
+  "occupation": "Senior Software Engineer",
+  "location": "Seattle"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "user": {
+    "id": 1,
+    "username": "johndoe",
+    "name": "John Smith",
+    "age": 29,
+    "occupation": "Senior Software Engineer",
+    "location": "Seattle"
+  }
+}
+```
+
+### DELETE `/users/profile`
+Delete user account.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "password": "securepassword123",
+  "confirmation": "DELETE"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Account deleted successfully"
+}
+```
+
+---
+
+## Emotion Tracking
+
+### POST `/emotions`
+Record a new emotion entry.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "emotion": "happy",
+  "intensity": 8,
+  "description": "Had a great day at work, completed an important project!",
+  "context": "work",
+  "triggers": ["achievement", "recognition"],
+  "location": "office"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Emotion recorded successfully",
+  "emotion": {
+    "id": 123,
+    "emotion": "happy",
+    "intensity": 8,
+    "description": "Had a great day at work, completed an important project!",
+    "context": "work",
+    "triggers": ["achievement", "recognition"],
+    "location": "office",
+    "timestamp": "2024-01-20T15:30:00Z",
+    "user_id": 1
+  }
+}
+```
+
+### GET `/emotions`
+Get user's emotion history.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Query Parameters:**
+- `limit` (optional): Number of records to return (default: 50, max: 200)
+- `offset` (optional): Number of records to skip (default: 0)
+- `start_date` (optional): Filter from date (YYYY-MM-DD)
+- `end_date` (optional): Filter to date (YYYY-MM-DD)
+- `emotion` (optional): Filter by emotion type
+- `context` (optional): Filter by context
+
+**Example:** `GET /emotions?limit=20&emotion=happy&start_date=2024-01-01`
+
+**Response:**
+```json
+{
+  "success": true,
+  "emotions": [
+    {
+      "id": 123,
+      "emotion": "happy",
+      "intensity": 8,
+      "description": "Had a great day at work!",
+      "context": "work",
+      "timestamp": "2024-01-20T15:30:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 150,
+    "limit": 20,
+    "offset": 0,
+    "has_next": true,
+    "has_prev": false
+  }
+}
+```
+
+### GET `/emotions/{id}`
+Get specific emotion entry.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:**
+```json
+{
+  "success": true,
+  "emotion": {
+    "id": 123,
+    "emotion": "happy",
+    "intensity": 8,
+    "description": "Had a great day at work!",
+    "context": "work",
+    "triggers": ["achievement"],
+    "timestamp": "2024-01-20T15:30:00Z",
+    "audio_logs": [
+      {
+        "id": 45,
+        "file_path": "/audio/emotion_123.wav",
+        "duration": 15.2,
+        "analysis": {
+          "tone": "positive",
+          "confidence": 0.85
+        }
+      }
     ]
   }
 }
 ```
 
-#### Get Leaderboard
-```http
-GET /games/leaderboard/{game_type}
-Authorization: Required
+### PUT `/emotions/{id}`
+Update emotion entry.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "intensity": 9,
+  "description": "Had an amazing day at work, got promoted!",
+  "context": "work",
+  "triggers": ["achievement", "promotion"]
+}
 ```
+
+### DELETE `/emotions/{id}`
+Delete emotion entry.
+
+**Headers:** `Authorization: Bearer <token>`
 
 **Response:**
 ```json
 {
-  "leaderboard": [
-    {
-      "rank": 1,
-      "score": 250,
-      "accuracy": 0.92,
-      "level_reached": 5
-    },
-    {
-      "rank": 2,
-      "score": 230,
-      "accuracy": 0.88,
-      "level_reached": 4
-    }
-  ],
-  "user_best_score": 180,
-  "user_rank": 15
+  "success": true,
+  "message": "Emotion deleted successfully"
 }
 ```
 
-### Analysis & Reports
+---
 
-#### Generate Analysis Report
-```http
-POST /analysis/generate
-Content-Type: application/json
-Authorization: Required
+## Mood Patterns
 
+### GET `/mood-patterns`
+Get user's mood patterns.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Query Parameters:**
+- `period` (optional): "daily", "weekly", "monthly" (default: "daily")
+- `start_date` (optional): Filter from date
+- `end_date` (optional): Filter to date
+- `limit` (optional): Number of records
+
+**Response:**
+```json
 {
-  "days_back": 30,
-  "report_type": "personal",
-  "include_recommendations": true
+  "success": true,
+  "patterns": [
+    {
+      "date": "2024-01-20",
+      "morning_mood": 7,
+      "afternoon_mood": 8,
+      "evening_mood": 6,
+      "average_mood": 7.0,
+      "dominant_emotions": ["happy", "calm"],
+      "notes": "Productive day overall"
+    }
+  ],
+  "summary": {
+    "average_mood": 7.2,
+    "mood_variance": 1.5,
+    "trend": "stable",
+    "best_time": "afternoon"
+  }
+}
+```
+
+### POST `/mood-patterns`
+Record daily mood pattern.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "date": "2024-01-20",
+  "morning_mood": 7,
+  "afternoon_mood": 8,
+  "evening_mood": 6,
+  "notes": "Good productive day"
+}
+```
+
+---
+
+## Audio Processing
+
+### POST `/audio/upload`
+Upload audio file for emotion analysis.
+
+**Headers:** 
+- `Authorization: Bearer <token>`
+- `Content-Type: multipart/form-data`
+
+**Form Data:**
+- `audio_file`: Audio file (wav, mp3, m4a)
+- `emotion_id` (optional): Link to emotion entry
+- `context` (optional): Recording context
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Audio uploaded successfully",
+  "audio_log": {
+    "id": 45,
+    "file_path": "/audio/recordings/audio_123.wav",
+    "duration": 15.2,
+    "file_size": 245760,
+    "format": "wav",
+    "sample_rate": 44100,
+    "recorded_at": "2024-01-20T15:30:00Z"
+  }
+}
+```
+
+### POST `/audio/analyze`
+Analyze audio for emotional content.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "audio_log_id": 45
 }
 ```
 
@@ -239,428 +431,185 @@ Authorization: Required
 ```json
 {
   "success": true,
-  "report_id": 67,
-  "message": "Analysis report generated successfully!",
-  "estimated_processing_time": "2-3 minutes"
+  "analysis": {
+    "emotion_predictions": {
+      "happy": 0.75,
+      "calm": 0.15,
+      "neutral": 0.08,
+      "sad": 0.02
+    },
+    "dominant_emotion": "happy",
+    "confidence": 0.75,
+    "audio_features": {
+      "pitch_mean": 180.5,
+      "energy_level": 0.65,
+      "tempo": 120,
+      "tone": "positive"
+    },
+    "processed_at": "2024-01-20T15:35:00Z"
+  }
 }
 ```
 
-#### Get Analysis Report
-```http
-GET /analysis/report/{report_id}
-Authorization: Required
-```
+### GET `/audio/{id}`
+Get audio log details.
+
+**Headers:** `Authorization: Bearer <token>`
 
 **Response:**
 ```json
 {
-  "id": 67,
-  "user_id": 1,
-  "generated_at": "2025-01-15T15:45:00Z",
-  "report_type": "personal",
-  "sessions_analyzed": 12,
-  "analysis_period": {
-    "start_date": "2024-12-15T00:00:00Z",
-    "end_date": "2025-01-15T00:00:00Z"
-  },
-  "overall_wellbeing_score": 0.75,
-  "confidence_score": 0.82,
+  "success": true,
+  "audio_log": {
+    "id": 45,
+    "emotion_id": 123,
+    "file_path": "/audio/recordings/audio_123.wav",
+    "duration": 15.2,
+    "analysis": {
+      "dominant_emotion": "happy",
+      "confidence": 0.75
+    },
+    "recorded_at": "2024-01-20T15:30:00Z"
+  }
+}
+```
+
+---
+
+## Analytics
+
+### GET `/analytics/summary`
+Get user's emotion analytics summary.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Query Parameters:**
+- `period`: "week", "month", "quarter", "year"
+- `start_date` (optional): Custom start date
+- `end_date` (optional): Custom end date
+
+**Response:**
+```json
+{
+  "success": true,
+  "analytics": {
+    "period": "month",
+    "period_start": "2024-01-01",
+    "period_end": "2024-01-31",
+    "total_entries": 85,
+    "avg_mood": 7.2,
+    "mood_variance": 1.8,
+    "dominant_emotion": "happy",
+    "emotion_distribution": {
+      "happy": 0.35,
+      "calm": 0.25,
+      "neutral": 0.20,
+      "anxious": 0.10,
+      "sad": 0.10
+    },
+    "context_distribution": {
+      "work": 0.40,
+      "personal": 0.30,
+      "social": 0.20,
+      "health": 0.10
+    },
+    "trends": {
+      "mood_trend": "improving",
+      "most_active_day": "Wednesday",
+      "best_time": "morning",
+      "emotional_stability": "stable"
+    },
+    "insights": [
+      "Your mood tends to be highest in the morning",
+      "Work context shows the most emotional entries",
+      "Your emotional stability has improved this month"
+    ]
+  }
+}
+```
+
+### GET `/analytics/trends`
+Get detailed trend analysis.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:**
+```json
+{
+  "success": true,
+  "trends": {
+    "daily_averages": [
+      {"date": "2024-01-01", "avg_mood": 6.5, "entry_count": 3},
+      {"date": "2024-01-02", "avg_mood": 7.2, "entry_count": 4}
+    ],
+    "weekly_patterns": {
+      "Monday": 6.8,
+      "Tuesday": 7.1,
+      "Wednesday": 7.5,
+      "Thursday": 7.2,
+      "Friday": 7.8,
+      "Saturday": 7.0,
+      "Sunday": 6.5
+    },
+    "hourly_patterns": {
+      "6": 6.5, "7": 7.0, "8": 7.2,
+      "12": 7.5, "18": 7.0, "22": 6.8
+    },
+    "emotion_correlations": {
+      "happy_confidence": 0.78,
+      "stress_energy": -0.65
+    }
+  }
+}
+```
+
+### GET `/analytics/insights`
+Get personalized insights and recommendations.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:**
+```json
+{
+  "success": true,
   "insights": {
-    "anxiety_indicators": {
-      "score": 0.35,
-      "level": "moderate",
-      "confidence": 0.69,
-      "key_patterns": [
-        "Inconsistent performance across difficulty levels",
-        "Attention lapses during longer sessions"
-      ]
-    }
-  },
-  "recommendations": [
-    {
-      "category": "stress_management",
-      "title": "Mindfulness Practice",
-      "description": "Consider incorporating 5-10 minutes of daily mindfulness meditation",
-      "priority": "high",
-      "action_items": [
-        "Try guided meditation apps",
-        "Practice deep breathing exercises",
-        "Set reminders for mindful moments"
-      ]
-    }
-  ],
-  "summary": "Overall positive mental health indicators with some areas for improvement in stress management and attention consistency."
-}
-```
-
-#### Get Behavioral Patterns
-```http
-GET /analysis/api/behavioral_patterns?days=30
-Authorization: Required
-```
-
-**Response:**
-```json
-{
-  "reaction_times": [
-    {
-      "timestamp": "2025-01-15T10:30:00Z",
-      "value": 245.2,
-      "game_type": "catch_thought"
-    }
-  ],
-  "stress_levels": [
-    {
-      "timestamp": "2025-01-15T10:30:00Z",
-      "value": 4
-    }
-  ],
-  "decision_patterns": {
-    "assertive_choice": 15,
-    "avoidant_choice": 8,
-    "aggressive_choice": 3
-  },
-  "emotional_states": {
-    "focused": 12,
-    "calm": 8,
-    "anxious": 5,
-    "distracted": 3
+    "behavioral_patterns": [
+      "You tend to feel happier in the morning",
+      "Work-related entries show higher intensity emotions"
+    ],
+    "recommendations": [
+      "Consider morning activities for mood boost",
+      "Take breaks during work for emotional balance"
+    ],
+    "achievements": [
+      "7-day consistent tracking streak",
+      "Emotional awareness improvement"
+    ],
+    "goals": [
+      {
+        "type": "mood_stability",
+        "target": 8.0,
+        "current": 7.2,
+        "progress": 0.72
+      }
+    ]
   }
 }
 ```
 
-### Dashboard APIs
+---
 
-#### Get Activity Data
-```http
-GET /dashboard/api/activity_data?days=7
-Authorization: Required
-```
+## Games
 
-**Response:**
-```json
-[
-  {
-    "date": "2025-01-15",
-    "session_count": 3,
-    "total_duration": 1250,
-    "avg_score": 162.5
-  },
-  {
-    "date": "2025-01-14",
-    "session_count": 2,
-    "total_duration": 780,
-    "avg_score": 145.0
-  }
-]
-```
+### GET `/games/leaderboard`
+Get game leaderboard.
 
-#### Get Performance Data
-```http
-GET /dashboard/api/performance_data?game_type=all
-Authorization: Required
-```
+**Headers:** `Authorization: Bearer <token>`
 
-**Response:**
-```json
-[
-  {
-    "date": "2025-01-15 14:30",
-    "score": 150,
-    "accuracy": 0.85,
-    "reaction_time": 245.2,
-    "game_type": "catch_thought"
-  },
-  {
-    "date": "2025-01-15 16:45",
-    "score": 180,
-    "accuracy": 0.92,
-    "reaction_time": 220.8,
-    "game_type": "stat_balance"
-  }
-]
-```
-
-### Therapist Access
-
-#### Grant Therapist Access
-```http
-POST /dashboard/grant_therapist_access
-Content-Type: application/x-www-form-urlencoded
-Authorization: Required
-
-therapist_email=therapist@clinic.com&duration=30
-```
-
-#### Revoke Therapist Access
-```http
-POST /dashboard/revoke_therapist_access/{access_id}
-Authorization: Required
-```
-
-#### Therapist Dashboard
-```http
-GET /analysis/therapist_view/{therapist_email}?token={access_token}
-```
+**Query Parameters:**
+- `game`: "emotional_balance" (required)
+- `period`: "daily", "weekly", "monthly", "all_time"
 
 **Response:**
 ```json
 {
-  "therapist_email": "therapist@clinic.com",
-  "patients": [
-    {
-      "user_id": 1,
-      "username": "patient_001", 
-      "age": 20,
-      "total_sessions": 15,
-      "recent_activity": 8,
-      "shared_reports": [
-        {
-          "id": 67,
-          "generated_at": "2025-01-15T15:45:00Z",
-          "overall_wellbeing_score": 0.75,
-          "summary": "Positive indicators with moderate stress levels"
-        }
-      ],
-      "last_activity": "2025-01-15T14:30:00Z"
-    }
-  ]
-}
-```
-
-## Error Handling
-
-### Standard Error Response Format
-```json
-{
-  "error": "Error description",
-  "code": "ERROR_CODE",
-  "details": "Additional error details",
-  "timestamp": "2025-01-15T12:00:00Z"
-}
-```
-
-### Common Error Codes
-
-| Status Code | Error Code | Description |
-|-------------|------------|-------------|
-| 400 | `INVALID_REQUEST` | Malformed request data |
-| 401 | `UNAUTHORIZED` | Authentication required |
-| 403 | `FORBIDDEN` | Insufficient permissions |
-| 404 | `NOT_FOUND` | Resource not found |
-| 429 | `RATE_LIMIT_EXCEEDED` | Too many requests |
-| 500 | `INTERNAL_ERROR` | Server error |
-
-### Game-Specific Errors
-
-| Error Code | Description |
-|------------|-------------|
-| `DAILY_LIMIT_REACHED` | Maximum daily games played |
-| `INVALID_GAME_TYPE` | Unsupported game type |
-| `SESSION_NOT_FOUND` | Game session doesn't exist |
-| `INSUFFICIENT_DATA` | Not enough data for analysis |
-
-## Rate Limiting
-
-| Endpoint Category | Limit | Window |
-|------------------|-------|---------|
-| Authentication | 10 requests | 1 minute |
-| Game Sessions | 50 requests | 1 hour |
-| Analysis Generation | 3 requests | 1 day |
-| General API | 100 requests | 1 hour |
-
-## Data Models
-
-### User Model
-```json
-{
-  "id": "integer",
-  "username": "string",
-  "email": "string",
-  "age": "integer",
-  "gender": "string",
-  "is_minor": "boolean",
-  "parental_consent": "boolean",
-  "created_at": "datetime",
-  "last_login": "datetime"
-}
-```
-
-### Game Session Model
-```json
-{
-  "id": "integer",
-  "user_id": "integer",
-  "game_type": "string",
-  "started_at": "datetime",
-  "ended_at": "datetime",
-  "duration": "integer (seconds)",
-  "score": "integer",
-  "level_reached": "integer",
-  "accuracy": "float (0-1)",
-  "average_reaction_time": "float (milliseconds)",
-  "consistency_score": "float (0-1)",
-  "decisions_made": "integer",
-  "completed": "boolean",
-  "behavioral_data": "json object"
-}
-```
-
-### Behavior Data Model
-```json
-{
-  "id": "integer",
-  "user_id": "integer",
-  "session_id": "integer",
-  "timestamp": "datetime",
-  "reaction_time": "float (milliseconds)",
-  "decision_type": "string",
-  "decision_value": "string",
-  "confidence_level": "float (0-1)",
-  "emotional_state": "string",
-  "stress_level": "integer (1-10)",
-  "accuracy": "boolean",
-  "hesitation_time": "float (milliseconds)",
-  "game_level": "integer",
-  "game_phase": "string",
-  "difficulty": "string",
-  "metadata": "json object"
-}
-```
-
-## Webhooks
-
-FeelSync supports webhooks for real-time notifications of important events.
-
-### Webhook Events
-
-| Event | Description |
-|-------|-------------|
-| `analysis.completed` | New analysis report generated |
-| `session.completed` | Game session finished |
-| `user.registered` | New user registration |
-| `alert.triggered` | Mental health alert triggered |
-
-### Webhook Payload Example
-```json
-{
-  "event": "analysis.completed",
-  "timestamp": "2025-01-15T15:45:00Z",
-  "data": {
-    "user_id": 1,
-    "report_id": 67,
-    "report_type": "personal",
-    "overall_score": 0.75,
-    "alerts": []
-  }
-}
-```
-
-## SDKs and Libraries
-
-### JavaScript SDK
-```javascript
-import FeelSyncSDK from '@feelsync/sdk-js';
-
-const client = new FeelSyncSDK({
-  baseUrl: 'https://api.feelsync.com',
-  apiKey: 'your_api_key'
-});
-
-// Start game session
-const session = await client.games.startSession('catch_thought');
-
-// Log behavioral data
-await client.games.logBehavior(session.id, {
-  reactionTime: 245.2,
-  decisionType: 'positive_catch',
-  accuracy: true
-});
-```
-
-### Python SDK
-```python
-from feelsync import FeelSyncClient
-
-client = FeelSyncClient(
-    base_url='https://api.feelsync.com',
-    api_key='your_api_key'
-)
-
-# Generate analysis
-report = client.analysis.generate_report(
-    days_back=30,
-    report_type='personal'
-)
-```
-
-## Testing
-
-### Test Environment
-```
-Base URL: https://test-api.feelsync.com
-```
-
-### Test Credentials
-```
-Username: test_user
-Password: TestPassword123
-```
-
-### Sample API Calls
-
-Use our Postman collection or curl examples:
-
-```bash
-# Login
-curl -X POST https://test-api.feelsync.com/auth/login \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username_or_email=test_user&password=TestPassword123"
-
-# Start game session
-curl -X POST https://test-api.feelsync.com/games/start_session \
-  -H "Content-Type: application/json" \
-  -H "Cookie: session=your_session_cookie" \
-  -d '{"game_type": "catch_thought"}'
-```
-
-## Changelog
-
-### Version 1.0.0 (January 2025)
-- Initial API release
-- User management endpoints
-- Game session management
-- Basic behavioral analysis
-- Dashboard APIs
-
-### Planned Features
-- Real-time game streaming
-- Advanced ML model APIs
-- Group therapy session support
-- Integration with external health platforms
-
-## Support
-
-For API support and questions:
-- Documentation: https://docs.feelsync.com
-- Support: support@feelsync.com
-- Discord: https://discord.gg/feelsync
-- GitHub Issues: https://github.com/feelsync/api/issues0.78,
-      "key_patterns": [
-        "Increased reaction time variability in social scenarios",
-        "Higher stress levels during decision-making tasks"
-      ]
-    },
-    "depression_indicators": {
-      "score": 0.25,
-      "level": "low",
-      "confidence": 0.71,
-      "key_patterns": [
-        "Consistent engagement across sessions",
-        "Positive emotional state majority of time"
-      ]
-    },
-    "attention_indicators": {
-      "score": 0.45,
-      "level": "moderate",
-      "confidence":
