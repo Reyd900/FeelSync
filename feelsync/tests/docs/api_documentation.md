@@ -45,6 +45,397 @@ Register a new user account.
 ```json
 {
   "success": true,
+  "leaderboard": [
+    {
+      "rank": 1,
+      "username": "johndoe",
+      "score": 2450,
+      "level": 8,
+      "achievements": 12,
+      "last_played": "2024-01-20T15:30:00Z"
+    },
+    {
+      "rank": 2,
+      "username": "janedoe",
+      "score": 2380,
+      "level": 7,
+      "achievements": 10,
+      "last_played": "2024-01-20T14:20:00Z"
+    }
+  ],
+  "user_rank": {
+    "rank": 15,
+    "score": 1840,
+    "level": 5
+  },
+  "total_players": 156
+}
+```
+
+### POST `/games/scores`
+Submit game score.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "game": "emotional_balance",
+  "level": 5,
+  "score": 1250,
+  "balance_achieved": 92,
+  "moves_used": 18,
+  "time_taken": 180,
+  "achievements_unlocked": ["efficient", "level5"]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Score submitted successfully",
+  "game_session": {
+    "id": 789,
+    "score": 1250,
+    "level": 5,
+    "rank_improvement": 3,
+    "new_achievements": ["efficient"],
+    "personal_best": true
+  }
+}
+```
+
+### GET `/games/stats`
+Get user's game statistics.
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Response:**
+```json
+{
+  "success": true,
+  "stats": {
+    "emotional_balance": {
+      "total_games": 45,
+      "highest_level": 8,
+      "best_score": 2450,
+      "total_playtime": 1800,
+      "achievements_unlocked": 12,
+      "average_balance": 87.5,
+      "completion_rate": 0.82
+    }
+  },
+  "overall": {
+    "total_games": 45,
+    "total_playtime": 1800,
+    "rank": 15,
+    "achievements": 12
+  }
+}
+```
+
+---
+
+## Error Handling
+
+All API endpoints return consistent error responses:
+
+### Error Response Format
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid input data",
+    "details": {
+      "field": "email",
+      "reason": "Invalid email format"
+    }
+  },
+  "timestamp": "2024-01-20T15:30:00Z",
+  "request_id": "req_123456"
+}
+```
+
+### Common Error Codes
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `AUTHENTICATION_REQUIRED` | 401 | No valid token provided |
+| `INVALID_TOKEN` | 401 | Token is expired or invalid |
+| `INSUFFICIENT_PERMISSIONS` | 403 | User lacks required permissions |
+| `RESOURCE_NOT_FOUND` | 404 | Requested resource doesn't exist |
+| `VALIDATION_ERROR` | 400 | Request data validation failed |
+| `DUPLICATE_RESOURCE` | 409 | Resource already exists |
+| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests |
+| `INTERNAL_ERROR` | 500 | Server error occurred |
+| `SERVICE_UNAVAILABLE` | 503 | Service temporarily unavailable |
+
+### Validation Errors
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Validation failed",
+    "details": {
+      "emotion": ["Invalid emotion type. Must be one of: happy, sad, angry, anxious, calm, neutral"],
+      "intensity": ["Intensity must be between 1 and 10"]
+    }
+  }
+}
+```
+
+---
+
+## Rate Limiting
+
+The API implements rate limiting to ensure fair usage:
+
+- **General endpoints:** 1000 requests per hour per user
+- **Authentication endpoints:** 10 requests per minute
+- **Audio upload:** 50 requests per hour
+- **Analytics:** 100 requests per hour
+
+Rate limit headers are included in all responses:
+```
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 995
+X-RateLimit-Reset: 1642694400
+```
+
+When rate limit is exceeded:
+```json
+{
+  "success": false,
+  "error": {
+    "code": "RATE_LIMIT_EXCEEDED",
+    "message": "Rate limit exceeded. Try again in 3600 seconds",
+    "retry_after": 3600
+  }
+}
+```
+
+---
+
+## Examples
+
+### Complete Emotion Tracking Flow
+
+1. **Register User:**
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "testpass123",
+    "name": "Test User"
+  }'
+```
+
+2. **Login and Get Token:**
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "testpass123"
+  }'
+```
+
+3. **Record Emotion:**
+```bash
+curl -X POST http://localhost:5000/api/v1/emotions \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "emotion": "happy",
+    "intensity": 8,
+    "description": "Great presentation at work today!",
+    "context": "work"
+  }'
+```
+
+4. **Get Emotion History:**
+```bash
+curl -X GET "http://localhost:5000/api/v1/emotions?limit=10&start_date=2024-01-01" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+5. **Get Analytics:**
+```bash
+curl -X GET "http://localhost:5000/api/v1/analytics/summary?period=month" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Audio Processing Flow
+
+1. **Upload Audio:**
+```bash
+curl -X POST http://localhost:5000/api/v1/audio/upload \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "audio_file=@emotion_recording.wav" \
+  -F "emotion_id=123"
+```
+
+2. **Analyze Audio:**
+```bash
+curl -X POST http://localhost:5000/api/v1/audio/analyze \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"audio_log_id": 45}'
+```
+
+### Game Integration
+
+1. **Submit Game Score:**
+```bash
+curl -X POST http://localhost:5000/api/v1/games/scores \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "game": "emotional_balance",
+    "level": 3,
+    "score": 750,
+    "balance_achieved": 88,
+    "moves_used": 22
+  }'
+```
+
+2. **Check Leaderboard:**
+```bash
+curl -X GET "http://localhost:5000/api/v1/games/leaderboard?game=emotional_balance&period=weekly" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+---
+
+## SDK and Libraries
+
+### JavaScript SDK Example
+```javascript
+import FeelSyncAPI from 'feelsync-sdk';
+
+const client = new FeelSyncAPI({
+  baseURL: 'http://localhost:5000/api/v1',
+  token: 'your_jwt_token'
+});
+
+// Record emotion
+const emotion = await client.emotions.create({
+  emotion: 'happy',
+  intensity: 8,
+  description: 'Great day at work!'
+});
+
+// Get analytics
+const analytics = await client.analytics.getSummary('month');
+```
+
+### Python SDK Example
+```python
+from feelsync import FeelSyncClient
+
+client = FeelSyncClient(
+    base_url='http://localhost:5000/api/v1',
+    token='your_jwt_token'
+)
+
+# Record emotion
+emotion = client.emotions.create(
+    emotion='happy',
+    intensity=8,
+    description='Great day at work!'
+)
+
+# Get analytics
+analytics = client.analytics.get_summary(period='month')
+```
+
+---
+
+## Webhooks
+
+FeelSync supports webhooks for real-time notifications:
+
+### Webhook Events
+- `emotion.created` - New emotion recorded
+- `mood.pattern_detected` - Mood pattern identified
+- `achievement.unlocked` - Game achievement unlocked
+- `insight.generated` - New insight available
+
+### Webhook Configuration
+```bash
+curl -X POST http://localhost:5000/api/v1/webhooks \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-app.com/webhooks/feelsync",
+    "events": ["emotion.created", "achievement.unlocked"],
+    "secret": "your_webhook_secret"
+  }'
+```
+
+### Webhook Payload Example
+```json
+{
+  "event": "emotion.created",
+  "data": {
+    "emotion": {
+      "id": 123,
+      "emotion": "happy",
+      "intensity": 8,
+      "user_id": 1,
+      "timestamp": "2024-01-20T15:30:00Z"
+    }
+  },
+  "timestamp": "2024-01-20T15:30:01Z",
+  "signature": "sha256=..."
+}
+```
+
+---
+
+## API Versioning
+
+The API uses URL-based versioning:
+- Current version: `v1`
+- Base URL: `http://localhost:5000/api/v1`
+
+When breaking changes are made, a new version will be released (e.g., `v2`). Previous versions will be supported for at least 12 months.
+
+---
+
+## Support and Resources
+
+- **API Status:** [https://status.feelsync.com](https://status.feelsync.com)
+- **Interactive Docs:** [http://localhost:5000/docs](http://localhost:5000/docs)
+- **GitHub Repository:** [https://github.com/feelsync/api](https://github.com/feelsync/api)
+- **Support Email:** api-support@feelsync.com
+
+---
+
+## Changelog
+
+### v1.2.0 (2024-01-20)
+- Added game leaderboard endpoints
+- Enhanced analytics with trend analysis
+- Improved audio processing accuracy
+- Added webhook support
+
+### v1.1.0 (2024-01-10)
+- Added mood pattern tracking
+- Enhanced emotion analytics
+- Added audio analysis features
+- Improved error handling
+
+### v1.0.0 (2024-01-01)
+- Initial API release
+- Basic emotion tracking
+- User authentication
+- Core analytics features"success": true,
   "message": "User registered successfully",
   "user": {
     "id": 1,
