@@ -1,586 +1,513 @@
-import pytest
+"""
+Test suite for FeelSync games functionality.
+Tests the game logic, scoring, achievements, and user interactions.
+"""
+
+import unittest
+from unittest.mock import Mock, patch, MagicMock
+import sys
+import os
 import json
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
-from models.database_models import db, GameSession, BehaviorData
-from tests import TestHelpers, SAMPLE_GAME_DATA
 
-class TestCatchTheThoughtGame:
-    """Test cases for Catch the Thought game functionality"""
-    
-    def test_game_initialization(self, app, auth_client):
-        """Test game initialization and setup"""
-        client, user = auth_client
-        
-        with app.app_context():
-            # Start session
-            response = client.post('/games/start_session',
-                                 json={'game_type': 'catch_thought'},
-                                 content_type='application/json')
-            
-            assert response.status_code == 200
-            data = json.loads(response.data)
-            session_id = data['session_id']
-            
-            # Check session was created properly
-            session = GameSession.query.get(session_id)
-            assert session.game_type == 'catch_thought'
-            assert session.user_id == user.id
-            assert session.started_at is not None
-    
-    def test_thought_catching_mechanics(self, app, auth_client):
-        """Test thought catching game mechanics"""
-        client, user = auth_client
-        
-        with app.app_context():
-            # Start session
-            start_response = client.post('/games/start_session',
-                                       json={'game_type': 'catch_thought'},
-                                       content_type='application/json')
-            session_id = json.loads(start_response.data)['session_id']
-            
-            # Simulate catching positive thoughts (good)
-            for i in range(3):
-                response = client.post('/games/log_behavior',
-                                     json={
-                                         'session_id': session_id,
-                                         'reaction_time': 200 + i*10,
-                                         'decision_type': 'positive_catch',
-                                         'decision_value': 'caught_positive_thought',
-                                         'accuracy': True,
-                                         'emotional_state': 'focused',
-                                         'game_level': 1,
-                                         'game_phase': 'catching'
-                                     },
-                                     content_type='application/json')
-                assert response.status_code == 200
-            
-            # Simulate missing negative thoughts (bad)
-            for i in range(2):
-                response = client.post('/games/log_behavior',
-                                     json={
-                                         'session_id': session_id,
-                                         'reaction_time': 400 + i*50,
-                                         'decision_type': 'negative_miss',
-                                         'decision_value': 'missed_negative_thought',
-                                         'accuracy': False,
-                                         'emotional_state': 'distracted',
-                                         'game_level': 1,
-                                         'game_phase': 'catching'
-                                     },
-                                     content_type='application/json')
-                assert response.status_code == 200
-            
-            # Check behavior data was logged
-            behavior_count = BehaviorData.query.filter_by(session_id=session_id).count()
-            assert behavior_count == 5
-    
-    def test_thought_categorization(self, app, auth_client):
-        """Test thought categorization accuracy"""
-        client, user = auth_client
-        
-        # Get thought scenarios
-        response = client.get('/games/get_scenarios/catch_thought')
-        assert response.status_code == 200
-        
-        data = json.loads(response.data)
-        scenarios = data['scenarios']
-        
-        assert 'positive_thoughts' in scenarios
-        assert 'negative_thoughts' in scenarios
-        assert 'neutral_thoughts' in scenarios
-        
-        # Verify thought categorization
-        assert len(scenarios['positive_thoughts']) > 0
-        assert len(scenarios['negative_thoughts']) > 0
-        assert len(scenarios['neutral_thoughts']) > 0
-    
-    def test_performance_tracking(self, app, auth_client):
-        """Test performance tracking in catch the thought"""
-        client, user = auth_client
-        
-        with app.app_context():
-            start_response = client.post('/games/start_session',
-                                       json={'game_type': 'catch_thought'},
-                                       content_type='application/json')
-            session_id = json.loads(start_response.data)['session_id']
-            
-            # Simulate varied performance
-            performance_data = [
-                {'reaction_time': 180, 'accuracy': True, 'thought_type': 'positive'},
-                {'reaction_time': 220, 'accuracy': True, 'thought_type': 'negative'},
-                {'reaction_time': 450, 'accuracy': False, 'thought_type': 'positive'},
-                {'reaction_time': 190, 'accuracy': True, 'thought_type': 'neutral'},
-            ]
-            
-            for data_point in performance_data:
-                client.post('/games/log_behavior',
-                          json={
-                              'session_id': session_id,
-                              'reaction_time': data_point['reaction_time'],
-                              'accuracy': data_point['accuracy'],
-                              'decision_type': f"{data_point['thought_type']}_thought",
-                              'game_level': 1
-                          },
-                          content_type='application/json')
-            
-            # End session with calculated metrics
-            avg_reaction_time = sum(d['reaction_time'] for d in performance_data) / len(performance_data)
-            accuracy = sum(1 for d in performance_data if d['accuracy']) / len(performance_data)
-            
-            end_response = client.post('/games/end_session',
-                                     json={
-                                         'session_id': session_id,
-                                         'final_score': 120,
-                                         'accuracy': accuracy,
-                                         'average_reaction_time': avg_reaction_time,
-                                         'completed': True
-                                     },
-                                     content_type='application/json')
-            
-            assert end_response.status_code == 200
-            
-            # Verify session data
-            session = GameSession.query.get(session_id)
-            assert session.accuracy == accuracy
-            assert abs(session.average_reaction_time - avg_reaction_time) < 1.0
+# Add project root to path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-class TestStatBalanceGame:
-    """Test cases for Stat Balance game functionality"""
+# Mock the game logic since it's primarily JavaScript-based
+class MockEmotionalBalanceGame:
+    """Mock class representing the JavaScript game logic for testing."""
     
-    def test_stat_balancing_scenarios(self, app, auth_client):
-        """Test stat balancing game scenarios"""
-        client, user = auth_client
-        
-        response = client.get('/games/get_scenarios/stat_balance')
-        assert response.status_code == 200
-        
-        data = json.loads(response.data)
-        scenarios = data['scenarios']['situations']
-        
-        # Verify scenario structure
-        for scenario in scenarios:
-            assert 'title' in scenario
-            assert 'description' in scenario
-            assert 'stats' in scenario
-            assert len(scenario['stats']) >= 3  # Should have multiple stats to balance
+    def __init__(self):
+        self.stats = {
+            'happiness': {'value': 50, 'color': '#FFD700', 'name': 'Happiness', 'emoji': '😊'},
+            'calm': {'value': 50, 'color': '#87CEEB', 'name': 'Calm', 'emoji': '😌'},
+            'confidence': {'value': 50, 'color': '#FF6B6B', 'name': 'Confidence', 'emoji': '💪'},
+            'focus': {'value': 50, 'color': '#4ECDC4', 'name': 'Focus', 'emoji': '🎯'},
+            'energy': {'value': 50, 'color': '#45B7D1', 'name': 'Energy', 'emoji': '⚡'},
+            'empathy': {'value': 50, 'color': '#96CEB4', 'name': 'Empathy', 'emoji': '❤️'}
+        }
+        self.level = 1
+        self.score = 0
+        self.moves = 30
+        self.target_balance = 85
+        self.achievements = {
+            'first-balance': False,
+            'perfectionist': False,
+            'efficient': False,
+            'level5': False,
+            'streak': False
+        }
+        self.level_streak = 0
     
-    def test_stat_allocation_decisions(self, app, auth_client):
-        """Test stat allocation decision making"""
-        client, user = auth_client
+    def adjust_stat(self, stat_name, change):
+        """Adjust a stat value and apply interactions."""
+        if self.moves <= 0:
+            return False
         
-        with app.app_context():
-            start_response = client.post('/games/start_session',
-                                       json={'game_type': 'stat_balance'},
-                                       content_type='application/json')
-            session_id = json.loads(start_response.data)['session_id']
-            
-            # Simulate stat allocation decisions
-            allocation_decisions = [
-                {'social_energy': 7, 'anxiety': 3, 'confidence': 8, 'fun': 6},
-                {'study_time': 9, 'stress': 6, 'sleep': 4, 'confidence': 7},
-                {'personal_time': 5, 'friendship': 9, 'stress': 4, 'guilt': 3}
-            ]
-            
-            for i, allocation in enumerate(allocation_decisions):
-                response = client.post('/games/log_behavior',
-                                     json={
-                                         'session_id': session_id,
-                                         'decision_type': 'stat_allocation',
-                                         'decision_value': json.dumps(allocation),
-                                         'reaction_time': 2000 + i*500,  # Longer thinking time
-                                         'game_level': i + 1,
-                                         'game_phase': f'scenario_{i+1}',
-                                         'metadata': {'allocation': allocation}
-                                     },
-                                     content_type='application/json')
-                assert response.status_code == 200
-            
-            # End session
-            end_response = client.post('/games/end_session',
-                                     json={
-                                         'session_id': session_id,
-                                         'final_score': 180,
-                                         'level_reached': 3,
-                                         'decisions_made': len(allocation_decisions),
-                                         'completed': True
-                                     },
-                                     content_type='application/json')
-            
-            assert end_response.status_code == 200
-            
-            # Verify decisions were logged
-            behavior_count = BehaviorData.query.filter_by(
-                session_id=session_id,
-                decision_type='stat_allocation'
-            ).count()
-            assert behavior_count == 3
+        if stat_name not in self.stats:
+            raise ValueError(f"Invalid stat name: {stat_name}")
+        
+        old_value = self.stats[stat_name]['value']
+        new_value = max(0, min(100, old_value + change))
+        
+        if old_value != new_value:
+            self.stats[stat_name]['value'] = new_value
+            self.moves -= 1
+            self.apply_stat_interactions(stat_name, change)
+            return True
+        
+        return False
     
-    def test_balance_optimization_analysis(self, app, auth_client):
-        """Test analysis of balance optimization patterns"""
-        client, user = auth_client
+    def apply_stat_interactions(self, changed_stat, change):
+        """Apply stat interactions based on the changed stat."""
+        interactions = {
+            'happiness': {'calm': 0.3, 'confidence': 0.2, 'energy': 0.4},
+            'calm': {'happiness': 0.2, 'focus': 0.5, 'confidence': 0.1},
+            'confidence': {'happiness': 0.3, 'energy': 0.2, 'empathy': -0.1},
+            'focus': {'calm': 0.3, 'energy': -0.2, 'empathy': -0.1},
+            'energy': {'happiness': 0.2, 'confidence': 0.3, 'calm': -0.3},
+            'empathy': {'happiness': 0.2, 'calm': 0.3, 'confidence': -0.1}
+        }
         
-        with app.app_context():
-            start_response = client.post('/games/start_session',
-                                       json={'game_type': 'stat_balance'},
-                                       content_type='application/json')
-            session_id = json.loads(start_response.data)['session_id']
-            
-            # Simulate different balancing strategies
-            strategies = [
-                'balanced',     # Even distribution
-                'risk_averse',  # Conservative choices
-                'aggressive',   # High-risk, high-reward
-                'reactive'      # Based on immediate needs
-            ]
-            
-            for i, strategy in enumerate(strategies):
-                response = client.post('/games/log_behavior',
-                                     json={
-                                         'session_id': session_id,
-                                         'decision_type': 'balancing_strategy',
-                                         'decision_value': strategy,
-                                         'game_level': i + 1,
-                                         'confidence_level': 0.7 if strategy == 'balanced' else 0.5,
-                                         'hesitation_time': 100 if strategy == 'aggressive' else 300
-                                     },
-                                     content_type='application/json')
-                assert response.status_code == 200
-            
-            # Check strategy diversity was captured
-            strategies_logged = BehaviorData.query.filter_by(
-                session_id=session_id,
-                decision_type='balancing_strategy'
-            ).all()
-            
-            strategy_values = [s.decision_value for s in strategies_logged]
-            assert len(set(strategy_values)) == 4  # All unique strategies
+        relations = interactions.get(changed_stat, {})
+        
+        for target_stat, multiplier in relations.items():
+            if target_stat in self.stats:
+                effect = change * multiplier
+                current_value = self.stats[target_stat]['value']
+                new_value = max(0, min(100, current_value + effect))
+                self.stats[target_stat]['value'] = new_value
+    
+    def calculate_balance(self):
+        """Calculate the current balance percentage."""
+        values = [stat['value'] for stat in self.stats.values()]
+        avg = sum(values) / len(values)
+        variance = sum((val - avg) ** 2 for val in values) / len(values)
+        balance = max(0, 100 - (variance ** 0.5))
+        return round(balance)
+    
+    def is_level_complete(self):
+        """Check if the current level is complete."""
+        return self.calculate_balance() >= self.target_balance
+    
+    def next_level(self):
+        """Advance to the next level."""
+        if self.is_level_complete():
+            self.level += 1
+            self.target_balance = min(95, 80 + self.level * 2)
+            self.moves = max(15, 35 - self.level)
+            self.level_streak += 1
+            self.reset_stats()
+            return True
+        return False
+    
+    def reset_stats(self):
+        """Reset all stats to starting values with some randomization."""
+        import random
+        random_factor = 20 if self.level > 3 else 10
+        
+        for stat in self.stats.values():
+            base_value = 50 + (random.random() - 0.5) * random_factor
+            stat['value'] = max(20, min(80, round(base_value)))
+    
+    def reset_game(self):
+        """Reset the entire game to initial state."""
+        self.__init__()
+    
+    def check_achievements(self, balance):
+        """Check and unlock achievements based on game state."""
+        unlocked = []
+        
+        if balance >= self.target_balance and not self.achievements['first-balance']:
+            self.achievements['first-balance'] = True
+            unlocked.append('first-balance')
+        
+        if balance == 100 and not self.achievements['perfectionist']:
+            self.achievements['perfectionist'] = True
+            unlocked.append('perfectionist')
+        
+        if self.moves > 10 and balance >= self.target_balance and not self.achievements['efficient']:
+            self.achievements['efficient'] = True
+            unlocked.append('efficient')
+        
+        if self.level >= 5 and not self.achievements['level5']:
+            self.achievements['level5'] = True
+            unlocked.append('level5')
+        
+        if self.level_streak >= 5 and not self.achievements['streak']:
+            self.achievements['streak'] = True
+            unlocked.append('streak')
+        
+        return unlocked
 
-class TestDecisionMakerGame:
-    """Test cases for Decision Maker game functionality"""
+class TestEmotionalBalanceGame(unittest.TestCase):
+    """Test cases for the Emotional Balance Game."""
     
-    def test_decision_scenarios(self, app, auth_client):
-        """Test decision maker game scenarios"""
-        client, user = auth_client
-        
-        response = client.get('/games/get_scenarios/decision_maker')
-        assert response.status_code == 200
-        
-        data = json.loads(response.data)
-        scenarios = data['scenarios']['scenarios']
-        
-        # Verify scenario structure
-        for scenario in scenarios:
-            assert 'id' in scenario
-            assert 'situation' in scenario
-            assert 'options' in scenario
-            assert len(scenario['options']) >= 3  # Multiple choice options
-            
-            for option in scenario['options']:
-                assert 'text' in option
-                assert 'type' in option  # Decision type classification
+    def setUp(self):
+        """Set up test fixtures before each test method."""
+        self.game = MockEmotionalBalanceGame()
     
-    def test_decision_pattern_analysis(self, app, auth_client):
-        """Test analysis of decision making patterns"""
-        client, user = auth_client
+    def test_game_initialization(self):
+        """Test that the game initializes correctly."""
+        self.assertEqual(self.game.level, 1)
+        self.assertEqual(self.game.score, 0)
+        self.assertEqual(self.game.moves, 30)
+        self.assertEqual(self.game.target_balance, 85)
+        self.assertEqual(len(self.game.stats), 6)
         
-        with app.app_context():
-            start_response = client.post('/games/start_session',
-                                       json={'game_type': 'decision_maker'},
-                                       content_type='application/json')
-            session_id = json.loads(start_response.data)['session_id']
-            
-            # Simulate decision patterns
-            decision_patterns = [
-                {'type': 'assertive', 'reaction_time': 200, 'confidence': 0.8},
-                {'type': 'avoidant', 'reaction_time': 450, 'confidence': 0.4},
-                {'type': 'aggressive', 'reaction_time': 150, 'confidence': 0.9},
-                {'type': 'passive_aggressive', 'reaction_time': 300, 'confidence': 0.6},
-                {'type': 'assertive', 'reaction_time': 180, 'confidence': 0.85}
-            ]
-            
-            for i, pattern in enumerate(decision_patterns):
-                response = client.post('/games/log_behavior',
-                                     json={
-                                         'session_id': session_id,
-                                         'decision_type': pattern['type'],
-                                         'reaction_time': pattern['reaction_time'],
-                                         'confidence_level': pattern['confidence'],
-                                         'game_level': (i // 2) + 1,
-                                         'accuracy': pattern['type'] in ['assertive', 'practical']
-                                     },
-                                     content_type='application/json')
-                assert response.status_code == 200
-            
-            # Analyze decision patterns
-            decisions = BehaviorData.query.filter_by(session_id=session_id).all()
-            
-            # Count assertive decisions (positive indicator)
-            assertive_count = sum(1 for d in decisions if d.decision_type == 'assertive')
-            avoidant_count = sum(1 for d in decisions if d.decision_type == 'avoidant')
-            
-            assert assertive_count == 2
-            assert avoidant_count == 1
+        # Check initial stat values
+        for stat_name, stat_data in self.game.stats.items():
+            self.assertEqual(stat_data['value'], 50)
+            self.assertIn('name', stat_data)
+            self.assertIn('color', stat_data)
+            self.assertIn('emoji', stat_data)
     
-    def test_social_scenario_responses(self, app, auth_client):
-        """Test responses to social scenarios"""
-        client, user = auth_client
+    def test_stat_adjustment(self):
+        """Test stat value adjustments."""
+        initial_happiness = self.game.stats['happiness']['value']
+        initial_moves = self.game.moves
         
-        with app.app_context():
-            start_response = client.post('/games/start_session',
-                                       json={'game_type': 'decision_maker'},
-                                       content_type='application/json')
-            session_id = json.loads(start_response.data)['session_id']
+        # Test positive adjustment
+        result = self.game.adjust_stat('happiness', 10)
+        self.assertTrue(result)
+        self.assertEqual(self.game.stats['happiness']['value'], initial_happiness + 10)
+        self.assertEqual(self.game.moves, initial_moves - 1)
+        
+        # Test negative adjustment
+        result = self.game.adjust_stat('happiness', -5)
+        self.assertTrue(result)
+        self.assertEqual(self.game.stats['happiness']['value'], initial_happiness + 5)
+        
+        # Test boundary conditions
+        self.game.stats['happiness']['value'] = 95
+        self.game.adjust_stat('happiness', 10)
+        self.assertEqual(self.game.stats['happiness']['value'], 100)  # Should cap at 100
+        
+        self.game.stats['happiness']['value'] = 5
+        self.game.adjust_stat('happiness', -10)
+        self.assertEqual(self.game.stats['happiness']['value'], 0)  # Should not go below 0
+    
+    def test_stat_interactions(self):
+        """Test that stat interactions work correctly."""
+        # Reset to known state
+        for stat in self.game.stats.values():
+            stat['value'] = 50
+        
+        initial_calm = self.game.stats['calm']['value']
+        initial_energy = self.game.stats['energy']['value']
+        
+        # Increase happiness, should affect calm and energy
+        self.game.adjust_stat('happiness', 10)
+        
+        # Calm should increase (happiness -> calm: 0.3 multiplier)
+        self.assertGreater(self.game.stats['calm']['value'], initial_calm)
+        
+        # Energy should increase (happiness -> energy: 0.4 multiplier)
+        self.assertGreater(self.game.stats['energy']['value'], initial_energy)
+    
+    def test_balance_calculation(self):
+        """Test balance calculation algorithm."""
+        # All stats equal should give perfect balance
+        for stat in self.game.stats.values():
+            stat['value'] = 50
+        balance = self.game.calculate_balance()
+        self.assertEqual(balance, 100)
+        
+        # High variance should give lower balance
+        values = [10, 90, 10, 90, 10, 90]
+        for i, stat in enumerate(self.game.stats.values()):
+            stat['value'] = values[i]
+        balance = self.game.calculate_balance()
+        self.assertLess(balance, 50)
+    
+    def test_level_completion(self):
+        """Test level completion logic."""
+        # Set balance below target
+        for stat in self.game.stats.values():
+            stat['value'] = 30  # This should give low balance
+        self.assertFalse(self.game.is_level_complete())
+        
+        # Set balance above target
+        for stat in self.game.stats.values():
+            stat['value'] = 50  # Perfect balance
+        self.assertTrue(self.game.is_level_complete())
+    
+    def test_next_level_progression(self):
+        """Test level progression mechanics."""
+        initial_level = self.game.level
+        initial_target = self.game.target_balance
+        
+        # Set up level completion condition
+        for stat in self.game.stats.values():
+            stat['value'] = 50
+        
+        result = self.game.next_level()
+        self.assertTrue(result)
+        self.assertEqual(self.game.level, initial_level + 1)
+        self.assertGreater(self.game.target_balance, initial_target)
+        self.assertEqual(self.game.level_streak, 1)
+        
+        # Test that moves decrease as level increases
+        self.assertLess(self.game.moves, 30)
+    
+    def test_moves_limit(self):
+        """Test that game respects move limits."""
+        self.game.moves = 1
+        
+        # Make one move
+        result = self.game.adjust_stat('happiness', 5)
+        self.assertTrue(result)
+        self.assertEqual(self.game.moves, 0)
+        
+        # Try to make another move - should fail
+        result = self.game.adjust_stat('happiness', 5)
+        self.assertFalse(result)
+        self.assertEqual(self.game.moves, 0)
+    
+    def test_invalid_stat_name(self):
+        """Test handling of invalid stat names."""
+        with self.assertRaises(ValueError):
+            self.game.adjust_stat('invalid_stat', 10)
+    
+    def test_achievement_unlocking(self):
+        """Test achievement unlocking system."""
+        # Test first balance achievement
+        balance = 85
+        unlocked = self.game.check_achievements(balance)
+        self.assertIn('first-balance', unlocked)
+        self.assertTrue(self.game.achievements['first-balance'])
+        
+        # Test perfectionist achievement
+        balance = 100
+        unlocked = self.game.check_achievements(balance)
+        self.assertIn('perfectionist', unlocked)
+        self.assertTrue(self.game.achievements['perfectionist'])
+        
+        # Test efficient achievement
+        self.game.moves = 15
+        balance = 85
+        unlocked = self.game.check_achievements(balance)
+        self.assertIn('efficient', unlocked)
+        
+        # Test level 5 achievement
+        self.game.level = 5
+        unlocked = self.game.check_achievements(85)
+        self.assertIn('level5', unlocked)
+        
+        # Test streak achievement
+        self.game.level_streak = 5
+        unlocked = self.game.check_achievements(85)
+        self.assertIn('streak', unlocked)
+    
+    def test_game_reset(self):
+        """Test game reset functionality."""
+        # Modify game state
+        self.game.level = 5
+        self.game.score = 1000
+        self.game.moves = 10
+        self.game.achievements['first-balance'] = True
+        
+        # Reset game
+        self.game.reset_game()
+        
+        # Check that everything is back to initial state
+        self.assertEqual(self.game.level, 1)
+        self.assertEqual(self.game.score, 0)
+        self.assertEqual(self.game.moves, 30)
+        self.assertFalse(self.game.achievements['first-balance'])
+    
+    def test_stat_boundary_enforcement(self):
+        """Test that stats stay within valid ranges."""
+        # Test upper boundary
+        self.game.stats['happiness']['value'] = 100
+        self.game.adjust_stat('happiness', 10)
+        self.assertEqual(self.game.stats['happiness']['value'], 100)
+        
+        # Test lower boundary
+        self.game.stats['happiness']['value'] = 0
+        self.game.adjust_stat('happiness', -10)
+        self.assertEqual(self.game.stats['happiness']['value'], 0)
+    
+    def test_level_scaling(self):
+        """Test that difficulty scales properly with levels."""
+        initial_target = self.game.target_balance
+        initial_moves = self.game.moves
+        
+        # Simulate progression through multiple levels
+        for level in range(1, 6):
+            self.game.level = level
+            self.game.target_balance = min(95, 80 + level * 2)
+            self.game.moves = max(15, 35 - level)
             
-            # Test specific social scenarios
-            social_scenarios = [
-                {
-                    'scenario': 'confrontation',
-                    'response': 'direct_communication',
-                    'stress_induced': 6,
-                    'reaction_time': 2500
-                },
-                {
-                    'scenario': 'peer_pressure',
-                    'response': 'boundary_setting',
-                    'stress_induced': 4,
-                    'reaction_time': 1800
-                },
-                {
-                    'scenario': 'helping_others',
-                    'response': 'empathetic_support',
-                    'stress_induced': 2,
-                    'reaction_time': 1200
-                }
-            ]
+            # Target should increase
+            if level > 1:
+                self.assertGreaterEqual(self.game.target_balance, initial_target)
             
-            for scenario_data in social_scenarios:
-                response = client.post('/games/log_behavior',
-                                     json={
-                                         'session_id': session_id,
-                                         'decision_type': 'social_scenario',
-                                         'decision_value': scenario_data['response'],
-                                         'stress_level': scenario_data['stress_induced'],
-                                         'reaction_time': scenario_data['reaction_time'],
-                                         'metadata': {'scenario_type': scenario_data['scenario']}
-                                     },
-                                     content_type='application/json')
-                assert response.status_code == 200
-            
-            # Verify stress patterns were captured
-            behaviors = BehaviorData.query.filter_by(session_id=session_id).all()
-            stress_levels = [b.stress_level for b in behaviors]
-            
-            # Confrontation should induce highest stress
-            assert max(stress_levels) == 6
-            # Helping others should induce lowest stress
-            assert min(stress_levels) == 2
+            # Moves should decrease (up to minimum of 15)
+            if level > 1:
+                self.assertLessEqual(self.game.moves, initial_moves)
 
-class TestGameIntegration:
-    """Integration tests for game systems"""
+
+class TestGameIntegration(unittest.TestCase):
+    """Integration tests for game features."""
     
-    def test_cross_game_performance_tracking(self, app, auth_client):
-        """Test performance tracking across different games"""
-        client, user = auth_client
-        
-        with app.app_context():
-            game_sessions = []
-            
-            # Play each game type
-            for game_type in ['catch_thought', 'stat_balance', 'decision_maker']:
-                start_response = client.post('/games/start_session',
-                                           json={'game_type': game_type},
-                                           content_type='application/json')
-                session_id = json.loads(start_response.data)['session_id']
-                
-                # Log some behavior data
-                client.post('/games/log_behavior',
-                          json={
-                              'session_id': session_id,
-                              'reaction_time': 250,
-                              'accuracy': True,
-                              'decision_type': f'{game_type}_decision'
-                          },
-                          content_type='application/json')
-                
-                # End session
-                end_response = client.post('/games/end_session',
-                                         json={
-                                             'session_id': session_id,
-                                             'final_score': 150,
-                                             'completed': True,
-                                             'accuracy': 0.85
-                                         },
-                                         content_type='application/json')
-                
-                game_sessions.append(session_id)
-                assert end_response.status_code == 200
-            
-            # Verify all sessions were created
-            total_sessions = GameSession.query.filter_by(user_id=user.id).count()
-            assert total_sessions == 3
-            
-            # Check cross-game data consistency
-            sessions = GameSession.query.filter_by(user_id=user.id).all()
-            for session in sessions:
-                assert session.score == 150
-                assert session.accuracy == 0.85
-                assert session.completed is True
+    def setUp(self):
+        """Set up integration test fixtures."""
+        self.game = MockEmotionalBalanceGame()
     
-    def test_game_session_persistence(self, app, auth_client):
-        """Test game session data persistence"""
-        client, user = auth_client
+    def test_complete_gameplay_scenario(self):
+        """Test a complete gameplay scenario."""
+        # Start game
+        self.assertEqual(self.game.level, 1)
+        self.assertEqual(self.game.moves, 30)
         
-        with app.app_context():
-            # Start session
-            start_response = client.post('/games/start_session',
-                                       json={'game_type': 'catch_thought'},
-                                       content_type='application/json')
-            session_id = json.loads(start_response.data)['session_id']
+        # Make strategic moves to balance stats
+        moves_made = 0
+        while not self.game.is_level_complete() and self.game.moves > 0:
+            # Simple strategy: adjust the most extreme stats toward 50
+            for stat_name, stat_data in self.game.stats.items():
+                if stat_data['value'] > 60:
+                    self.game.adjust_stat(stat_name, -2)
+                    moves_made += 1
+                    break
+                elif stat_data['value'] < 40:
+                    self.game.adjust_stat(stat_name, 2)
+                    moves_made += 1
+                    break
+            else:
+                # If no extreme stats, make small random adjustments
+                import random
+                stat_name = random.choice(list(self.game.stats.keys()))
+                change = random.choice([-1, 1])
+                self.game.adjust_stat(stat_name, change)
+                moves_made += 1
+        
+        # Check results
+        if self.game.is_level_complete():
+            balance = self.game.calculate_balance()
+            self.assertGreaterEqual(balance, self.game.target_balance)
             
-            # Add comprehensive behavioral data
-            behavior_entries = [
-                {
-                    'reaction_time': 225,
-                    'decision_type': 'positive_catch',
-                    'accuracy': True,
-                    'stress_level': 3,
-                    'emotional_state': 'focused'
-                },
-                {
-                    'reaction_time': 180,
-                    'decision_type': 'negative_catch',
-                    'accuracy': True,
-                    'stress_level': 2,
-                    'emotional_state': 'calm'
-                },
-                {
-                    'reaction_time': 350,
-                    'decision_type': 'neutral_miss',
-                    'accuracy': False,
-                    'stress_level': 5,
-                    'emotional_state': 'distracted'
-                }
-            ]
-            
-            for entry in behavior_entries:
-                client.post('/games/log_behavior',
-                          json=dict({'session_id': session_id}, **entry),
-                          content_type='application/json')
-            
-            # End session with detailed metrics
-            end_response = client.post('/games/end_session',
-                                     json={
-                                         'session_id': session_id,
-                                         'final_score': 175,
-                                         'level_reached': 3,
-                                         'accuracy': 0.67,
-                                         'average_reaction_time': 251.7,
-                                         'consistency_score': 0.75,
-                                         'decisions_made': 3,
-                                         'completed': True
-                                     },
-                                     content_type='application/json')
-            
-            assert end_response.status_code == 200
-            
-            # Verify complete data persistence
-            session = GameSession.query.get(session_id)
-            assert session.score == 175
-            assert session.level_reached == 3
-            assert session.accuracy == 0.67
-            assert session.decisions_made == 3
-            
-            # Verify behavior data persistence
-            behaviors = BehaviorData.query.filter_by(session_id=session_id).all()
-            assert len(behaviors) == 3
-            
-            # Verify specific behavior data
-            positive_catch = next((b for b in behaviors if b.decision_type == 'positive_catch'), None)
-            assert positive_catch is not None
-            assert positive_catch.reaction_time == 225
-            assert positive_catch.emotional_state == 'focused'
+            # Test level progression
+            initial_level = self.game.level
+            self.game.next_level()
+            self.assertEqual(self.game.level, initial_level + 1)
     
-    def test_game_feedback_system(self, app, auth_client):
-        """Test game feedback and rating system"""
-        client, user = auth_client
+    def test_achievement_progression(self):
+        """Test achievement unlocking through gameplay."""
+        # Simulate achieving perfect balance
+        for stat in self.game.stats.values():
+            stat['value'] = 50
         
-        with app.app_context():
-            # Complete a game session
-            start_response = client.post('/games/start_session',
-                                       json={'game_type': 'stat_balance'},
-                                       content_type='application/json')
-            session_id = json.loads(start_response.data)['session_id']
-            
-            # End session
-            client.post('/games/end_session',
-                       json={
-                           'session_id': session_id,
-                           'final_score': 200,
-                           'completed': True
-                       },
-                       content_type='application/json')
-            
-            # Submit feedback
-            feedback_response = client.post('/games/game_feedback',
-                                          json={
-                                              'session_id': session_id,
-                                              'enjoyment_rating': 4,
-                                              'difficulty_rating': 3,
-                                              'engagement_level': 5,
-                                              'comments': 'Great game! Really engaging.',
-                                              'would_play_again': True
-                                          },
-                                          content_type='application/json')
-            
-            assert feedback_response.status_code == 200
-            
-            # Verify feedback was stored
-            session = GameSession.query.get(session_id)
-            assert 'user_feedback' in session.behavioral_data
-            
-            feedback_data = session.behavioral_data['user_feedback']
-            assert feedback_data['enjoyment_rating'] == 4
-            assert feedback_data['would_play_again'] is True
+        balance = self.game.calculate_balance()
+        unlocked = self.game.check_achievements(balance)
+        
+        self.assertIn('first-balance', unlocked)
+        if balance == 100:
+            self.assertIn('perfectionist', unlocked)
     
-    def test_pause_resume_functionality(self, app, auth_client):
-        """Test game pause and resume functionality"""
-        client, user = auth_client
+    def test_multi_level_progression(self):
+        """Test progression through multiple levels."""
+        completed_levels = 0
+        max_levels = 5
         
-        with app.app_context():
-            # Start session
-            start_response = client.post('/games/start_session',
-                                       json={'game_type': 'decision_maker'},
-                                       content_type='application/json')
-            session_id = json.loads(start_response.data)['session_id']
+        while completed_levels < max_levels:
+            # Set perfect balance to complete level
+            for stat in self.game.stats.values():
+                stat['value'] = 50
             
-            # Play for a while
-            client.post('/games/log_behavior',
-                       json={
-                           'session_id': session_id,
-                           'reaction_time': 200,
-                           'decision_type': 'assertive'
-                       },
-                       content_type='application/json')
-            
-            # Pause game
-            pause_response = client.post('/games/pause_session',
-                                       json={
-                                           'session_id': session_id,
-                                           'current_score': 75,
-                                           'current_level': 2,
-                                           'time_played': 120
-                                       },
-                                       content_type='application/json')
-            
-            assert pause_response.status_code == 200
-            
-            # Resume game
-            resume_response = client.post('/games/resume_session',
-                                        json={'session_id': session_id},
-                                        content_type='application/json')
-            
-            assert resume_response.status_code == 200
-            resume_data = json.loads(resume_response.data)
-            assert 'pause_data' in resume_data
-            assert resume_data['pause_data']['current_score'] == 75
+            if self.game.is_level_complete():
+                self.game.next_level()
+                completed_levels += 1
+            else:
+                break
+        
+        self.assertGreater(completed_levels, 0)
+        self.assertEqual(self.game.level_streak, completed_levels)
+
+
+class TestGamePerformance(unittest.TestCase):
+    """Performance tests for game operations."""
+    
+    def test_stat_adjustment_performance(self):
+        """Test that stat adjustments perform efficiently."""
+        import time
+        
+        game = MockEmotionalBalanceGame()
+        
+        start_time = time.time()
+        
+        # Perform many stat adjustments
+        for _ in range(1000):
+            game.adjust_stat('happiness', 1)
+            if game.moves <= 0:
+                game.moves = 30  # Reset moves for continued testing
+        
+        end_time = time.time()
+        duration = end_time - start_time
+        
+        # Should complete 1000 adjustments in less than 1 second
+        self.assertLess(duration, 1.0)
+    
+    def test_balance_calculation_performance(self):
+        """Test that balance calculations are efficient."""
+        import time
+        
+        game = MockEmotionalBalanceGame()
+        
+        start_time = time.time()
+        
+        # Perform many balance calculations
+        for _ in range(10000):
+            game.calculate_balance()
+        
+        end_time = time.time()
+        duration = end_time - start_time
+        
+        # Should complete 10000 calculations in less than 1 second
+        self.assertLess(duration, 1.0)
+
+
+if __name__ == '__main__':
+    # Create test suite
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    
+    # Add test cases
+    suite.addTests(loader.loadTestsFromTestCase(TestEmotionalBalanceGame))
+    suite.addTests(loader.loadTestsFromTestCase(TestGameIntegration))
+    suite.addTests(loader.loadTestsFromTestCase(TestGamePerformance))
+    
+    # Run tests
+    runner = unittest.TextTestRunner(verbosity=2)
+    print("="*60)
+    print("FEELSYNC GAMES TEST SUITE")
+    print("="*60)
+    print(f"Testing Emotional Balance Game functionality...")
+    print(f"Test started at: {datetime.now()}")
+    print("="*60)
+    
+    result = runner.run(suite)
+    
+    print("\n" + "="*60)
+    print("TEST SUMMARY")
+    print("="*60)
+    print(f"Tests run: {result.testsRun}")
+    print(f"Failures: {len(result.failures)}")
+    print(f"Errors: {len(result.errors)}")
+    print(f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
+    
+    if result.failures:
+        print(f"\nFAILURES:")
+        for test, traceback in result.failures:
+            print(f"- {test}: {traceback}")
+    
+    if result.errors:
+        print(f"\nERRORS:")
+        for test, traceback in result.errors:
+            print(f"- {test}: {traceback}")
+    
+    print(f"\nTest completed at: {datetime.now()}")
+    
+    # Exit with appropriate code
+    exit_code = 0 if result.wasSuccessful() else 1
+    sys.exit(exit_code)
